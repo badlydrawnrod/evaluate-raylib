@@ -8,10 +8,7 @@ namespace my
     constexpr int screenHeight = 720;
 
     constexpr Vector2 shipLines[] = {{-1, 1}, {0, -1}, {1, 1}, {0, 0.5f}, {-1, 1}};
-
-    Vector2 shipPos[2] = {{screenWidth / 4, screenHeight / 2}, {3 * screenWidth / 4, screenHeight / 2}};
-    Vector2 shipVel[2] = {{0, 0}, {0, 0}};
-    float shipHeading[2] = {45.0f, -45.0f};
+    constexpr Vector2 shotLines[] = {{0, -0.25f}, {0, 0.25f}};
 
     GamepadNumber pads[2] = {GAMEPAD_PLAYER1, GAMEPAD_PLAYER2};
 
@@ -19,32 +16,44 @@ namespace my
     constexpr float shipOverlap = 2 * shipScale;
     constexpr float maxRotationSpeed = 4.0f;
     constexpr float speed = 0.1f;
+    constexpr float shotSpeed = 6.0f;
+    constexpr float shotDuration = 90.0f;
 
-    int numShips = 2;
+    using Position = Vector2;
+    using Velocity = Vector2;
+    using Heading = float;
 
-    void MoveShip(int id)
+    struct Ship
     {
-        // Which gamepad are we using?
-        const GamepadNumber pad = pads[id];
+        int player;
+        Position pos;
+        Velocity vel;
+        Heading heading;
+        GamepadNumber pad;
+    };
 
-        // Rotate the ship.
-        float& heading = shipHeading[id];
-        const float axis = GetGamepadAxisMovement(pad, 0);
-        heading += axis * maxRotationSpeed;
+    struct Shot
+    {
+        int alive;
+        Position pos;
+        Velocity vel;
+        Heading heading;
+    };
 
-        // Accelerate the ship.
-        Vector2& vel = shipVel[id];
-        if (IsGamepadButtonDown(pad, GAMEPAD_BUTTON_RIGHT_FACE_DOWN))
-        {
-            vel.x += cosf((heading - 90) * DEG2RAD) * speed;
-            vel.y += sinf((heading - 90) * DEG2RAD) * speed;
-        }
+    Ship ships[2] = {
+            {1, {screenWidth / 4, screenHeight / 2}, {0, 0}, -45, GAMEPAD_PLAYER1},
+            {2, {3 * screenWidth / 4, screenHeight / 2}, {0, 0}, 45, GAMEPAD_PLAYER2},
+    };
+    constexpr int numShips = sizeof(ships) / sizeof(Ship);
 
-        // Move the ship.
-        Vector2& pos = shipPos[id];
+    Shot shots[10];
+    constexpr int numShots = sizeof(shots) / sizeof(Shot);
+
+    void Move(Position& pos, Velocity vel)
+    {
         pos = Vector2Add(pos, vel);
 
-        // Wrap the ship around the play area.
+        // Wrap the position around the play area.
         if (pos.x >= screenWidth)
         {
             pos.x -= screenWidth;
@@ -63,11 +72,71 @@ namespace my
         }
     }
 
+    void Move(Ship& ship)
+    {
+        Move(ship.pos, ship.vel);
+    }
+
+    void Move(Shot& shot)
+    {
+        Move(shot.pos, shot.vel);
+    }
+
+    void Update(Ship& ship)
+    {
+        // Rotate the ship.
+        const float axis = GetGamepadAxisMovement(ship.pad, 0);
+        ship.heading += axis * maxRotationSpeed;
+
+        // Accelerate the ship.
+        if (IsGamepadButtonDown(ship.pad, GAMEPAD_BUTTON_RIGHT_FACE_DOWN))
+        {
+            ship.vel.x += cosf((ship.heading - 90) * DEG2RAD) * speed;
+            ship.vel.y += sinf((ship.heading - 90) * DEG2RAD) * speed;
+        }
+
+        // Fire.
+        if (IsGamepadButtonPressed(ship.pad, GAMEPAD_BUTTON_RIGHT_FACE_LEFT))
+        {
+            const int baseStart = (ship.player == 1) ? 0 : numShots / 2;
+            const int baseEnd = baseStart + numShots / 2;
+            for (int i = baseStart; i < baseEnd; i++)
+            {
+                if (shots[i].alive == 0)
+                {
+                    Shot& shot = shots[i];
+                    shot.alive = shotDuration;
+                    shot.pos = ship.pos;
+                    shot.heading = ship.heading;
+                    shot.vel.x = cosf((ship.heading - 90) * DEG2RAD) * shotSpeed;
+                    shot.vel.y = sinf((ship.heading - 90) * DEG2RAD) * shotSpeed;
+                    break;
+                }
+            }
+        }
+
+        // Move the ship.
+        Move(ship);
+    }
+
+    void Update(Shot& shot)
+    {
+        if (shot.alive > 0)
+        {
+            Move(shot);
+            --shot.alive;
+        }
+    }
+
     void Update()
     {
-        for (int i = 0; i < numShips; i++)
+        for (auto& ship : ships)
         {
-            MoveShip(i);
+            Update(ship);
+        }
+        for (auto& shot : shots)
+        {
+            Update(shot);
         }
     }
 
@@ -81,10 +150,20 @@ namespace my
         DrawLineStrip(points, 5, RAYWHITE);
     }
 
-    void DrawShip(int id)
+    void DrawShotAt(Vector2 pos, float heading)
     {
-        const Vector2 pos = shipPos[id];
-        const float heading = shipHeading[id];
+        Vector2 points[2];
+        for (int i = 0; i < 2; i++)
+        {
+            points[i] = Vector2Add(Vector2Scale(Vector2Rotate(shotLines[i], heading), shipScale), pos);
+        }
+        DrawLineStrip(points, 2, RAYWHITE);
+    }
+
+    void Draw(const Ship& ship)
+    {
+        const Vector2 pos = ship.pos;
+        const float heading = ship.heading;
 
         // Which edges of the play area does the ship overlap?
         const bool overlapsTop = pos.y - shipOverlap < 0;
@@ -112,13 +191,25 @@ namespace my
         }
     }
 
+    void Draw(const Shot& shot)
+    {
+        DrawShotAt(shot.pos, shot.heading);
+    }
+
     void Draw()
     {
         ClearBackground(BLACK);
         BeginDrawing();
-        for (int i = 0; i < numShips; i++)
+        for (const auto& ship : ships)
         {
-            DrawShip(i);
+            Draw(ship);
+        }
+        for (const auto& shot : shots)
+        {
+            if (shot.alive > 0)
+            {
+                Draw(shot);
+            }
         }
         DrawFPS(4, 4);
         EndDrawing();
