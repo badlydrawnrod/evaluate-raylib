@@ -8,9 +8,14 @@ find_package(raylib 3.0 QUIET)
 if (NOT raylib_FOUND)
     include(FetchContent)
 
+    # Temporarily pinned to a local commit that's known to work.
     FetchContent_Declare(
             raylib
-            URL https://github.com/raysan5/raylib/archive/master.tar.gz
+            # URL https://github.com/raysan5/raylib/archive/master.tar.gz
+            GIT_REPOSITORY ${CMAKE_SOURCE_DIR}/../3rdparty/raylib
+            GIT_TAG rod
+            # GIT_REPOSITORY https://github.com/raysan5/raylib.git
+            # GIT_TAG 23ed67cce0c0498896cea84cda9c7a0080ef55f8
     )
     FetchContent_GetProperties(raylib)
 
