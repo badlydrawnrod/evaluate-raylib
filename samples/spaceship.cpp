@@ -1,6 +1,8 @@
 #include "raylib.h"
 #include "raymath.h"
 
+#include <array>
+
 namespace my
 {
     constexpr int targetFps = 60;
@@ -40,14 +42,12 @@ namespace my
         Heading heading;
     };
 
-    Ship ships[2] = {
-            {1, {screenWidth / 4, screenHeight / 2}, {0, 0}, -45, GAMEPAD_PLAYER1},
-            {2, {3 * screenWidth / 4, screenHeight / 2}, {0, 0}, 45, GAMEPAD_PLAYER2},
-    };
-    constexpr int numShips = sizeof(ships) / sizeof(Ship);
+    std::array<Ship, 2> ships{Ship{1, {screenWidth / 4, screenHeight / 2}, {0, 0}, -45, GAMEPAD_PLAYER1},
+                              Ship{2, {3 * screenWidth / 4, screenHeight / 2}, {0, 0}, 45, GAMEPAD_PLAYER2}};
+    constexpr int numShips = ships.size();
 
-    Shot shots[10];
-    constexpr int numShots = sizeof(shots) / sizeof(Shot);
+    std::array<Shot, 10> shots;
+    constexpr int numShots = shots.size();
 
     void Move(Position& pos, Velocity vel)
     {
