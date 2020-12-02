@@ -140,7 +140,7 @@ namespace my
                     shot.heading = ship.heading;
                     Vector2 angle{cosf((ship.heading - 90) * DEG2RAD), sinf((ship.heading - 90) * DEG2RAD)};
                     shot.pos = Vector2Add(ship.pos, Vector2Scale(angle, shipScale));
-                    shot.vel = Vector2Scale(angle, shotSpeed);
+                    shot.vel = Vector2Add(Vector2Scale(angle, shotSpeed), ship.vel);
                     break;
                 }
             }
