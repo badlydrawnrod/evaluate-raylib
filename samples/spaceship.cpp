@@ -12,8 +12,6 @@ namespace my
     constexpr Vector2 shipLines[] = {{-1, 1}, {0, -1}, {1, 1}, {0, 0.5f}, {-1, 1}};
     constexpr Vector2 shotLines[] = {{0, -0.25f}, {0, 0.25f}};
 
-    GamepadNumber pads[2] = {GAMEPAD_PLAYER1, GAMEPAD_PLAYER2};
-
     constexpr float shipScale = 16.0f;
     constexpr float shipOverlap = 2 * shipScale;
     constexpr float maxRotationSpeed = 4.0f;
@@ -139,10 +137,10 @@ namespace my
                 {
                     Shot& shot = shots[i];
                     shot.alive = shotDuration;
-                    shot.pos = ship.pos;
                     shot.heading = ship.heading;
-                    shot.vel.x = cosf((ship.heading - 90) * DEG2RAD) * shotSpeed;
-                    shot.vel.y = sinf((ship.heading - 90) * DEG2RAD) * shotSpeed;
+                    Vector2 angle{cosf((ship.heading - 90) * DEG2RAD), sinf((ship.heading - 90) * DEG2RAD)};
+                    shot.pos = Vector2Add(ship.pos, Vector2Scale(angle, shipScale));
+                    shot.vel = Vector2Scale(angle, shotSpeed);
                     break;
                 }
             }
