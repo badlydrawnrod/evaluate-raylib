@@ -20,6 +20,8 @@ namespace my
     constexpr float speed = 0.1f;
     constexpr float shotSpeed = 6.0f;
     constexpr float shotDuration = 90.0f;
+    constexpr float shipCollisionRadius = shipScale;
+    constexpr float shotCollisionRadius = shipScale * 0.5f;
 
     using Position = Vector2;
     using Velocity = Vector2;
@@ -27,6 +29,7 @@ namespace my
 
     struct Ship
     {
+        bool alive;
         int player;
         Position pos;
         Velocity vel;
@@ -42,11 +45,11 @@ namespace my
         Heading heading;
     };
 
-    std::array<Ship, 2> ships{Ship{1, {screenWidth / 4, screenHeight / 2}, {0, 0}, -45, GAMEPAD_PLAYER1},
-                              Ship{2, {3 * screenWidth / 4, screenHeight / 2}, {0, 0}, 45, GAMEPAD_PLAYER2}};
-    constexpr int numShips = ships.size();
+    std::array<Ship, 2> ships{Ship{true, 1, {screenWidth / 4, screenHeight / 2}, {0, 0}, -45, GAMEPAD_PLAYER1},
+                              Ship{true, 2, {3 * screenWidth / 4, screenHeight / 2}, {0, 0}, 45, GAMEPAD_PLAYER2}};
 
-    std::array<Shot, 10> shots;
+    using Shots = std::array<Shot, 10>;
+    Shots shots;
     constexpr int numShots = shots.size();
 
     void Move(Position& pos, Velocity vel)
@@ -82,8 +85,38 @@ namespace my
         Move(shot.pos, shot.vel);
     }
 
+    void Collide(Ship& ship, Shot& shot)
+    {
+        if (CheckCollisionCircles(ship.pos, shipCollisionRadius, shot.pos, shotCollisionRadius))
+        {
+            ship.alive = false;
+            shot.alive = 0;
+        }
+    }
+
+    void Collide(Ship& ship, Shots::iterator start, Shots::iterator end)
+    {
+        if (!ship.alive)
+        {
+            return;
+        }
+
+        for (auto shotIt = start; shotIt != end; ++shotIt)
+        {
+            if (shotIt->alive > 0)
+            {
+                Collide(ship, *shotIt);
+            }
+        }
+    }
+
     void Update(Ship& ship)
     {
+        if (!ship.alive)
+        {
+            return;
+        }
+
         // Rotate the ship.
         const float axis = GetGamepadAxisMovement(ship.pad, 0);
         ship.heading += axis * maxRotationSpeed;
@@ -121,11 +154,12 @@ namespace my
 
     void Update(Shot& shot)
     {
-        if (shot.alive > 0)
+        if (shot.alive == 0)
         {
-            Move(shot);
-            --shot.alive;
+            return;
         }
+        Move(shot);
+        --shot.alive;
     }
 
     void Update()
@@ -138,6 +172,9 @@ namespace my
         {
             Update(shot);
         }
+
+        Collide(ships[0], shots.begin() + shots.size() / 2, shots.end());
+        Collide(ships[1], shots.begin(), shots.begin() + shots.size() / 2);
     }
 
     void DrawShipAt(Vector2 pos, float heading)
@@ -202,7 +239,10 @@ namespace my
         BeginDrawing();
         for (const auto& ship : ships)
         {
-            Draw(ship);
+            if (ship.alive)
+            {
+                Draw(ship);
+            }
         }
         for (const auto& shot : shots)
         {
