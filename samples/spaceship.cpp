@@ -249,7 +249,7 @@ namespace my
                 Draw(shot);
             }
         }
-        DrawFPS(4, 4);
+        DrawFPS(4, screenHeight - 24);
         EndDrawing();
     }
 
