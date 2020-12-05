@@ -25,6 +25,65 @@ namespace my
     using Velocity = Vector2;
     using Heading = float;
 
+    enum ControllerId
+    {
+        CONTROLLER_GAMEPAD1,
+        CONTROLLER_GAMEPAD2,
+        CONTROLLER_KEYBOARD1,
+        CONTROLLER_KEYBOARD2
+    };
+
+    bool IsControllerThrustDown(int controller)
+    {
+        switch (controller)
+        {
+        case CONTROLLER_GAMEPAD1:
+            return IsGamepadButtonDown(GAMEPAD_PLAYER1, GAMEPAD_BUTTON_RIGHT_FACE_DOWN);
+        case CONTROLLER_GAMEPAD2:
+            return IsGamepadButtonDown(GAMEPAD_PLAYER2, GAMEPAD_BUTTON_RIGHT_FACE_DOWN);
+        case CONTROLLER_KEYBOARD1:
+            return IsKeyDown(KEY_W);
+        case CONTROLLER_KEYBOARD2:
+            return IsKeyDown(KEY_UP);
+        default:
+            return false;
+        }
+    }
+
+    bool IsControllerFirePressed(int controller)
+    {
+        switch (controller)
+        {
+        case CONTROLLER_GAMEPAD1:
+            return IsGamepadButtonPressed(GAMEPAD_PLAYER1, GAMEPAD_BUTTON_RIGHT_FACE_LEFT);
+        case CONTROLLER_GAMEPAD2:
+            return IsGamepadButtonPressed(GAMEPAD_PLAYER2, GAMEPAD_BUTTON_RIGHT_FACE_LEFT);
+        case CONTROLLER_KEYBOARD1:
+            return IsKeyPressed(KEY_SPACE);
+        case CONTROLLER_KEYBOARD2:
+            return IsKeyPressed(KEY_RIGHT_CONTROL);
+        default:
+            return false;
+        }
+    }
+
+    float GetControllerTurnRate(int controller)
+    {
+        switch (controller)
+        {
+        case CONTROLLER_GAMEPAD1:
+            return GetGamepadAxisMovement(GAMEPAD_PLAYER1, GAMEPAD_AXIS_LEFT_X);
+        case CONTROLLER_GAMEPAD2:
+            return GetGamepadAxisMovement(GAMEPAD_PLAYER2, GAMEPAD_AXIS_LEFT_X);
+        case CONTROLLER_KEYBOARD1:
+            return (IsKeyDown(KEY_D) ? 1.0f : 0.0f) - (IsKeyDown(KEY_A) ? 1.0f : 0.0f);
+        case CONTROLLER_KEYBOARD2:
+            return (IsKeyDown(KEY_RIGHT) ? 1.0f : 0.0f) - (IsKeyDown(KEY_LEFT) ? 1.0f : 0.0f);
+        default:
+            return 0.0f;
+        }
+    }
+
     struct Ship
     {
         bool alive;
@@ -32,7 +91,7 @@ namespace my
         Position pos;
         Velocity vel;
         Heading heading;
-        GamepadNumber pad;
+        ControllerId controller;
     };
 
     struct Shot
@@ -43,8 +102,8 @@ namespace my
         Heading heading;
     };
 
-    std::array<Ship, 2> ships{Ship{true, 1, {screenWidth / 4, screenHeight / 2}, {0, 0}, -45, GAMEPAD_PLAYER1},
-                              Ship{true, 2, {3 * screenWidth / 4, screenHeight / 2}, {0, 0}, 45, GAMEPAD_PLAYER2}};
+    std::array<Ship, 2> ships{Ship{true, 1, {screenWidth / 4, screenHeight / 2}, {0, 0}, -45, CONTROLLER_GAMEPAD1},
+                              Ship{true, 2, {3 * screenWidth / 4, screenHeight / 2}, {0, 0}, 45, CONTROLLER_GAMEPAD2}};
 
     using Shots = std::array<Shot, 10>;
     Shots shots;
@@ -116,18 +175,18 @@ namespace my
         }
 
         // Rotate the ship.
-        const float axis = GetGamepadAxisMovement(ship.pad, 0);
+        float axis = GetControllerTurnRate(ship.controller);
         ship.heading += axis * maxRotationSpeed;
 
         // Accelerate the ship.
-        if (IsGamepadButtonDown(ship.pad, GAMEPAD_BUTTON_RIGHT_FACE_DOWN))
+        if (IsControllerThrustDown(ship.controller))
         {
             ship.vel.x += cosf((ship.heading - 90) * DEG2RAD) * speed;
             ship.vel.y += sinf((ship.heading - 90) * DEG2RAD) * speed;
         }
 
         // Fire.
-        if (IsGamepadButtonPressed(ship.pad, GAMEPAD_BUTTON_RIGHT_FACE_LEFT))
+        if (IsControllerFirePressed(ship.controller))
         {
             const int baseStart = (ship.player == 1) ? 0 : numShots / 2;
             const int baseEnd = baseStart + numShots / 2;
