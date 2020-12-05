@@ -345,7 +345,7 @@ int main()
     InitWindow(my::screenWidth, my::screenHeight, "Spaceships");
     SetTargetFPS(my::targetFps);
 
-    my::font = LoadFont("mecha.png");
+    my::font = LoadFont("assets/mecha.png");
 
     while (!WindowShouldClose())
     {

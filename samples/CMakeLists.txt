@@ -11,4 +11,11 @@ foreach (samples_source ${samples_sources})
     add_executable(${sample_name} ${samples_source})
 
     target_link_libraries(${sample_name} raylib)
-endforeach()
+endforeach ()
+
+
+set(samples_assets)
+file(GLOB assets assets/*)
+list(APPEND samples_assets ${assets})
+
+file(COPY ${samples_assets} DESTINATION "assets/")
