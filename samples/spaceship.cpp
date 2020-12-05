@@ -21,6 +21,8 @@ namespace my
     constexpr float shipCollisionRadius = shipScale;
     constexpr float shotCollisionRadius = shipScale * 0.5f;
 
+    Font font;
+
     using Position = Vector2;
     using Velocity = Vector2;
     using Heading = float;
@@ -323,6 +325,14 @@ namespace my
                 Draw(shot);
             }
         }
+
+        // TODO: draw this properly.
+        int fontSize = font.baseSize * 2;
+        DrawTextEx(font, "PLAYER 1", {8, 4}, fontSize, 2, RAYWHITE);
+        DrawTextEx(font, " 000100", {8, 40}, fontSize, 2, RAYWHITE);
+        DrawTextEx(font, "PLAYER 2", {screenWidth - 104, 4}, fontSize, 2, RAYWHITE);
+        DrawTextEx(font, " 002000", {screenWidth - 104, 40}, fontSize, 2, RAYWHITE);
+
         DrawFPS(4, screenHeight - 24);
         EndDrawing();
     }
@@ -334,6 +344,8 @@ int main()
     SetConfigFlags(FLAG_MSAA_4X_HINT);
     InitWindow(my::screenWidth, my::screenHeight, "Spaceships");
     SetTargetFPS(my::targetFps);
+
+    my::font = LoadFont("mecha.png");
 
     while (!WindowShouldClose())
     {
