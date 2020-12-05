@@ -151,6 +151,15 @@ namespace my
         }
     }
 
+    void Collide(Ship& ship1, Ship& ship2)
+    {
+        if (CheckCollisionCircles(ship1.pos, shipCollisionRadius, ship2.pos, shipCollisionRadius))
+        {
+            ship1.alive = false;
+            ship2.alive = false;
+        }
+    }
+
     void Collide(Ship& ship, Shots::iterator start, Shots::iterator end)
     {
         if (!ship.alive)
@@ -232,6 +241,7 @@ namespace my
 
         Collide(ships[0], shots.begin() + shots.size() / 2, shots.end());
         Collide(ships[1], shots.begin(), shots.begin() + shots.size() / 2);
+        Collide(ships[0], ships[1]);
     }
 
     void DrawShipAt(Vector2 pos, float heading)
