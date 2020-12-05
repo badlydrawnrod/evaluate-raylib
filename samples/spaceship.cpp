@@ -322,6 +322,11 @@ int main()
 
     while (!WindowShouldClose())
     {
+        if (IsKeyPressed(KEY_F11))
+        {
+            ToggleFullscreen();
+        }
+
         my::Update();
         my::Draw();
     }
