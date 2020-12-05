@@ -103,7 +103,7 @@ namespace my
     };
 
     std::array<Ship, 2> ships{Ship{true, 1, {screenWidth / 4, screenHeight / 2}, {0, 0}, -45, CONTROLLER_GAMEPAD1},
-                              Ship{true, 2, {3 * screenWidth / 4, screenHeight / 2}, {0, 0}, 45, CONTROLLER_GAMEPAD2}};
+                              Ship{true, 2, {3 * screenWidth / 4, screenHeight / 2}, {0, 0}, 45, CONTROLLER_KEYBOARD2}};
 
     using Shots = std::array<Shot, 10>;
     Shots shots;
@@ -153,6 +153,11 @@ namespace my
 
     void Collide(Ship& ship1, Ship& ship2)
     {
+        if (!ship1.alive || !ship2.alive)
+        {
+            return;
+        }
+
         if (CheckCollisionCircles(ship1.pos, shipCollisionRadius, ship2.pos, shipCollisionRadius))
         {
             ship1.alive = false;
