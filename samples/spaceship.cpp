@@ -1,6 +1,10 @@
 #include "raylib.h"
 #include "raymath.h"
 
+#if defined(PLATFORM_WEB) || defined(EMSCRIPTEN)
+#include <emscripten/emscripten.h>
+#endif
+
 #include <array>
 
 namespace my
@@ -339,6 +343,17 @@ namespace my
 
 } // namespace my
 
+void UpdateDrawFrame()
+{
+    if (IsKeyPressed(KEY_F11))
+    {
+        ToggleFullscreen();
+    }
+
+    my::Update();
+    my::Draw();
+}
+
 int main()
 {
     SetConfigFlags(FLAG_MSAA_4X_HINT);
@@ -347,16 +362,14 @@ int main()
 
     my::font = LoadFont("assets/mecha.png");
 
+#if defined(PLATFORM_WEB) || defined(EMSCRIPTEN)
+    emscripten_set_main_loop(UpdateDrawFrame, my::targetFps, 1);
+#else
     while (!WindowShouldClose())
     {
-        if (IsKeyPressed(KEY_F11))
-        {
-            ToggleFullscreen();
-        }
-
-        my::Update();
-        my::Draw();
+        UpdateDrawFrame();
     }
+#endif
     CloseWindow();
 
     return 0;
