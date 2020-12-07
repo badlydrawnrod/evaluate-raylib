@@ -222,6 +222,17 @@ namespace my
             ship.vel.y += sinf((ship.heading - 90) * DEG2RAD) * speed;
         }
 
+        // Move the ship.
+        Move(ship);
+    }
+
+    void CheckForFire(Ship& ship)
+    {
+        if (!ship.alive)
+        {
+            return;
+        }
+
         // Fire.
         if (IsControllerFirePressed(ship.controller))
         {
@@ -241,9 +252,6 @@ namespace my
                 }
             }
         }
-
-        // Move the ship.
-        Move(ship);
     }
 
     void Update(Shot& shot)
@@ -270,6 +278,18 @@ namespace my
         Collide(ships[0], shots.begin() + shots.size() / 2, shots.end());
         Collide(ships[1], shots.begin(), shots.begin() + shots.size() / 2);
         Collide(ships[0], ships[1]);
+    }
+
+    void Update()
+    {
+    }
+
+    void HandleEdgeTriggeredEvents()
+    {
+        for (auto& ship : ships)
+        {
+            CheckForFire(ship);
+        }
     }
 
     void DrawShipAt(Vector2 pos, float heading)
@@ -358,11 +378,6 @@ namespace my
         EndDrawing();
     }
 
-    void Update()
-    {
-        // If you wanted a non-fixed update, then here's where you'd put it.
-    }
-
     void UpdateDrawFrame()
     {
         if (IsKeyPressed(KEY_F11))
@@ -384,6 +399,9 @@ namespace my
             FixedUpdate();
             timing.t += timing.updateInterval;
             timing.accumulator -= timing.updateInterval;
+#if defined(EMSCRIPTEN)
+            HandleEdgeTriggeredEvents();
+#endif
         }
 
         Update();
@@ -395,6 +413,9 @@ namespace my
         {
             timing.lastDrawTime = now;
             Draw(); // Make like a gunslinger.
+#if !defined(EMSCRIPTEN)
+            HandleEdgeTriggeredEvents();
+#endif
         }
     }
 } // namespace my
