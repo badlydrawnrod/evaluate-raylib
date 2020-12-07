@@ -63,7 +63,7 @@ namespace my
         case CONTROLLER_KEYBOARD1:
             return IsKeyPressed(KEY_SPACE);
         case CONTROLLER_KEYBOARD2:
-            return IsKeyPressed(KEY_RIGHT_CONTROL);
+            return IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_KP_ENTER);
         default:
             return false;
         }
