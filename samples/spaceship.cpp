@@ -256,7 +256,7 @@ namespace my
         --shot.alive;
     }
 
-    void Update()
+    void FixedUpdate()
     {
         for (auto& ship : ships)
         {
@@ -358,6 +358,11 @@ namespace my
         EndDrawing();
     }
 
+    void Update()
+    {
+        // If you wanted a non-fixed update, then here's where you'd put it.
+    }
+
     void UpdateDrawFrame()
     {
         if (IsKeyPressed(KEY_F11))
@@ -376,10 +381,12 @@ namespace my
         timing.accumulator += delta;
         while (timing.accumulator >= timing.updateInterval)
         {
-            Update();
+            FixedUpdate();
             timing.t += timing.updateInterval;
             timing.accumulator -= timing.updateInterval;
         }
+
+        Update();
 
         // Draw, potentially capping the frame rate.
         now = GetTime();
