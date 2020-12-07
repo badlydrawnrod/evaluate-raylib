@@ -27,6 +27,15 @@ namespace my
 
     Font font;
 
+    struct
+    {
+        double t = 0.0;                  // Now.
+        double dt = 1.0 / my::targetFps; // Desired update interval (seconds).
+        double lastTime = GetTime();     // When did we last try an update/draw?
+        double accumulator = 0.0;        // What was left over.
+        double lastDrawTime = GetTime(); // When did we last draw.
+    } timing;
+
     using Position = Vector2;
     using Velocity = Vector2;
     using Heading = float;
@@ -108,8 +117,8 @@ namespace my
         Heading heading;
     };
 
-    std::array<Ship, 2> ships{Ship{true, 1, {screenWidth / 4, screenHeight / 2}, {0, 0}, -45, CONTROLLER_GAMEPAD1},
-                              Ship{true, 2, {3 * screenWidth / 4, screenHeight / 2}, {0, 0}, 45, CONTROLLER_KEYBOARD2}};
+    std::array<Ship, 2> ships{Ship{true, 1, {screenWidth / 4, screenHeight / 2}, {0, 0}, -45, CONTROLLER_KEYBOARD1},
+                              Ship{true, 2, {3 * screenWidth / 4, screenHeight / 2}, {0, 0}, 45, CONTROLLER_GAMEPAD1}};
 
     using Shots = std::array<Shot, 10>;
     Shots shots;
@@ -341,18 +350,34 @@ namespace my
         EndDrawing();
     }
 
-} // namespace my
-
-void UpdateDrawFrame()
-{
-    if (IsKeyPressed(KEY_F11))
+    void UpdateDrawFrame()
     {
-        ToggleFullscreen();
-    }
+        if (IsKeyPressed(KEY_F11))
+        {
+            ToggleFullscreen();
+        }
 
-    my::Update();
-    my::Draw();
-}
+        // Update using: https://gafferongames.com/post/fix_your_timestep/
+        double now = GetTime();
+        double delta = now - timing.lastTime;
+        if (delta >= 0.1)
+        {
+            delta = 0.1;
+        }
+        timing.lastTime = now;
+        timing.accumulator += delta;
+        while (timing.accumulator >= timing.dt)
+        {
+            // theGame->Update(t, dt);
+            Update();
+
+            timing.t += timing.dt;
+            timing.accumulator -= timing.dt;
+        }
+
+        Draw();
+    }
+} // namespace my
 
 int main()
 {
@@ -363,11 +388,11 @@ int main()
     my::font = LoadFont("assets/mecha.png");
 
 #if defined(PLATFORM_WEB) || defined(EMSCRIPTEN)
-    emscripten_set_main_loop(UpdateDrawFrame, my::targetFps, 1);
+    emscripten_set_main_loop(my::UpdateDrawFrame, 0, 1);
 #else
     while (!WindowShouldClose())
     {
-        UpdateDrawFrame();
+        my::UpdateDrawFrame();
     }
 #endif
     CloseWindow();
