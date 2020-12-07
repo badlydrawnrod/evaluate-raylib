@@ -4,7 +4,7 @@
 
 namespace my
 {
-    constexpr int targetFps = 60;
+    constexpr int updateFps = 60;
     constexpr int screenWidth = 1280;
     constexpr int screenHeight = 720;
 
@@ -21,7 +21,7 @@ namespace my
 int main()
 {
     InitWindow(my::screenWidth, my::screenHeight, "Empty");
-    SetTargetFPS(my::targetFps);
+    SetTargetFPS(my::updateFps);
 
     while (!WindowShouldClose())
     {

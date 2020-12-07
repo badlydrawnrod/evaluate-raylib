@@ -4,7 +4,7 @@
 
 namespace my
 {
-    constexpr int targetFps = 60;
+    constexpr int updateFps = 60;
     constexpr int screenWidth = 1280;
     constexpr int screenHeight = 720;
 
@@ -72,7 +72,7 @@ namespace my
 int main()
 {
     InitWindow(my::screenWidth, my::screenHeight, "Racetrack");
-    SetTargetFPS(my::targetFps);
+    SetTargetFPS(my::updateFps);
 
     my::renderTarget = LoadRenderTexture(my::virtualWidth, my::virtualHeight);
     SetTextureFilter(my::renderTarget.texture, FILTER_ANISOTROPIC_16X);

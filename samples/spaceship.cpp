@@ -9,7 +9,8 @@
 
 namespace my
 {
-    constexpr int targetFps = 60;
+    constexpr int renderFps = 60;
+    constexpr int updateFps = 60;
     constexpr int screenWidth = 1280;
     constexpr int screenHeight = 720;
 
@@ -27,13 +28,20 @@ namespace my
 
     Font font;
 
+#if defined(EMSCRIPTEN)
+    bool capFrameRate = false;
+#else
+    bool capFrameRate = true;
+#endif
+
     struct
     {
-        double t = 0.0;                  // Now.
-        double dt = 1.0 / my::targetFps; // Desired update interval (seconds).
-        double lastTime = GetTime();     // When did we last try an update/draw?
-        double accumulator = 0.0;        // What was left over.
-        double lastDrawTime = GetTime(); // When did we last draw.
+        double t = 0.0;                                               // Now.
+        double updateInterval = 1.0 / updateFps;                      // Desired update interval (seconds).
+        double renderInterval = capFrameRate ? 1.0 / renderFps : 0.0; // Desired renderer interval (seconds).
+        double lastTime = GetTime();                                  // When did we last try an update/draw?
+        double accumulator = 0.0;                                     // What was left over.
+        double lastDrawTime = GetTime();                              // When did we last draw?
     } timing;
 
     using Position = Vector2;
@@ -366,16 +374,21 @@ namespace my
         }
         timing.lastTime = now;
         timing.accumulator += delta;
-        while (timing.accumulator >= timing.dt)
+        while (timing.accumulator >= timing.updateInterval)
         {
-            // theGame->Update(t, dt);
             Update();
-
-            timing.t += timing.dt;
-            timing.accumulator -= timing.dt;
+            timing.t += timing.updateInterval;
+            timing.accumulator -= timing.updateInterval;
         }
 
-        Draw();
+        // Draw, potentially capping the frame rate.
+        now = GetTime();
+        double drawInterval = now - timing.lastDrawTime;
+        if (drawInterval >= timing.renderInterval)
+        {
+            timing.lastDrawTime = now;
+            Draw(); // Make like a gunslinger.
+        }
     }
 } // namespace my
 
@@ -383,7 +396,7 @@ int main()
 {
     SetConfigFlags(FLAG_MSAA_4X_HINT);
     InitWindow(my::screenWidth, my::screenHeight, "Spaceships");
-    SetTargetFPS(my::targetFps);
+    SetTargetFPS(my::renderFps);
 
     my::font = LoadFont("assets/mecha.png");
 
