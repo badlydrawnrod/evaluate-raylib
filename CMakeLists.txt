@@ -3,11 +3,12 @@ project(0x37_evaluate_raylib)
 
 set(CMAKE_CXX_STANDARD 20)
 
+include(FetchContent)
+
 # Search for a raylib-config.cmake. Fetch it and build it if we can't find one.
 if (NOT EMSCRIPTEN)
     find_package(raylib 3.0 QUIET)
     if (NOT raylib_FOUND)
-        include(FetchContent)
 
         FetchContent_Declare(
                 raylib
@@ -37,6 +38,32 @@ if (EMSCRIPTEN)
     add_library(raylib STATIC IMPORTED)
     set_property(TARGET raylib PROPERTY IMPORTED_LOCATION "D:\\Users\\Rod\\Projects\\3rdparty\\raylib\\build\\raylib-dev_webassembly\\lib\\libraylib.a")
     include_directories(D:\\Users\\Rod\\Projects\\3rdparty\\raylib\\build\\raylib-dev_webassembly\\include)
+endif ()
+
+# Obtain raygui if we don't already have it.
+find_package(raygui QUIET)
+if (NOT raygui_FOUND)
+
+    FetchContent_Declare(
+            raygui
+            GIT_REPOSITORY https://github.com/raysan5/raygui.git
+            GIT_SHALLOW ON
+            GIT_TAG master
+    )
+
+    FetchContent_GetProperties(raygui)
+
+    # Download and build raygui.
+    if (NOT raygui_POPULATED)
+        set(FETCHCONTENT_QUIET NO)
+        FetchContent_Populate(raygui)
+
+        # Don't build the raygui examples.
+        set(BUILD_RAYGUI_EXAMPLES OFF CACHE BOOL "" FORCE)
+
+        # Build raygui.
+        add_subdirectory(${raygui_SOURCE_DIR}/projects/CMake ${raygui_BINARY_DIR})
+    endif ()
 endif ()
 
 set(raylib_VERBOSE 1)
