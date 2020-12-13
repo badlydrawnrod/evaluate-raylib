@@ -16,7 +16,7 @@ foreach (samples_source ${samples_sources})
     get_filename_component(sample_name ${samples_source} NAME)
     string(REPLACE ".cpp" "${OUTPUT_EXT}" sample_name ${sample_name})
 
-    add_executable(${sample_name} ${samples_source} raygui.c)
+    add_executable(${sample_name} ${samples_source} raygui.c menu.cpp menu.h controllers.h screens.h screens.cpp config.cpp config.h playing.cpp playing.h)
 
     target_include_directories(${sample_name} INTERFACE raygui)
     target_link_libraries(${sample_name} raylib raygui)
