@@ -126,6 +126,7 @@ namespace my
             timing.t += timing.updateInterval;
             timing.accumulator -= timing.updateInterval;
 #if defined(EMSCRIPTEN)
+            // Required, otherwise it misses keyboard events.
             HandleEdgeTriggeredEvents();
 #endif
         }
@@ -140,6 +141,7 @@ namespace my
             timing.lastDrawTime = now;
             Draw(); // Make like a gunslinger.
 #if !defined(EMSCRIPTEN)
+            // Required, otherwise it misses events when there's a high frame rate.
             HandleEdgeTriggeredEvents();
 #endif
         }
