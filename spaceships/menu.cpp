@@ -5,7 +5,7 @@
 #include "raygui.h"
 #include "screens.h"
 
-namespace menu
+namespace
 {
     enum AssignmentStatus
     {
@@ -28,52 +28,28 @@ namespace menu
         char description[16];    // Description of the controller's status and assignment.
     } playerControllers[maxPlayers];
 
-    int numControllers;
+    constexpr int maxControllers = 6;
+    int numControllers = 0;
+
     struct ControllerInfo
     {
-        ControllerId controller;
-        const char* description;
-    } controllers[6];
+        ControllerId controller; // The controller id, e.g., CONTROLLER_GAMEPAD1.
+        const char* description; // The controller's description, e.g., "Gamepad 1".
+    } controllers[maxControllers];
 
     constexpr struct
     {
-        GamepadNumber gamepadNumber;
-        ControllerId controllerId;
-        const char* description;
+        GamepadNumber gamepadNumber; // Which raylib gamepad is this?
+        ControllerId controllerId;   // Which controller is this?
+        const char* description;     // What do we display to the player?
     } gamepadDescriptors[4] = {{GAMEPAD_PLAYER1, CONTROLLER_GAMEPAD1, "Gamepad 1"},
                                {GAMEPAD_PLAYER2, CONTROLLER_GAMEPAD2, "Gamepad 2"},
                                {GAMEPAD_PLAYER3, CONTROLLER_GAMEPAD3, "Gamepad 3"},
                                {GAMEPAD_PLAYER4, CONTROLLER_GAMEPAD4, "Gamepad 4"}};
 
-    bool requestCancellation;
+    bool cancellationRequested = false;
 
-    void Start()
-    {
-        screenWidth = GetScreenWidth();
-        screenHeight = GetScreenHeight();
-
-        numPlayers = 0;
-        numControllers = 2;
-        requestCancellation = false;
-
-        for (auto& playerController : playerControllers)
-        {
-            playerController.controller = CONTROLLER_UNASSIGNED;
-            playerController.status = Unassigned;
-            playerController.description[0] = '\0';
-        }
-    }
-
-    ControllerId GetControllerAssignment(int player)
-    {
-        return playerControllers[player].controller;
-    }
-
-    int GetNumberOfPlayers()
-    {
-        return numPlayers;
-    }
-
+    // Determine if a controller is unassigned, assigned, or confirmed.
     AssignmentStatus GetControllerStatus(ControllerId controller)
     {
         for (int i = 0; i < numPlayers; i++)
@@ -87,6 +63,7 @@ namespace menu
         return Unassigned;
     }
 
+    // Assign a controller.
     void AssignController(ControllerId controller)
     {
         for (int i = 0; i < numPlayers; i++)
@@ -102,6 +79,7 @@ namespace menu
         }
     }
 
+    // Unassign a controller.
     void UnassignController(ControllerId controller)
     {
         for (int i = 0; i < numPlayers; i++)
@@ -117,6 +95,7 @@ namespace menu
         }
     }
 
+    // Confirm an assigned controller.
     void ConfirmController(ControllerId controller)
     {
         for (int i = 0; i < numPlayers; i++)
@@ -130,6 +109,7 @@ namespace menu
         }
     }
 
+    // Unconfirm a confirmed controller and put it back to assigned.
     void UnconfirmController(ControllerId controller)
     {
         for (int i = 0; i < numPlayers; i++)
@@ -143,6 +123,7 @@ namespace menu
         }
     }
 
+    // Check the keyboard for selection / cancellation.
     void CheckKeyboard(KeyboardKey selectKey, KeyboardKey cancelKey, ControllerId controller)
     {
         if (IsKeyReleased(selectKey))
@@ -170,12 +151,13 @@ namespace menu
                 UnassignController(controller);
                 break;
             default:
-                requestCancellation = true;
+                cancellationRequested = true;
                 break;
             }
         }
     }
 
+    // Check a gamepad for selection / cancellation.
     void CheckGamepad(GamepadNumber gamepad, ControllerId controller)
     {
         if (IsGamepadAvailable(gamepad))
@@ -205,16 +187,16 @@ namespace menu
                     UnassignController(controller);
                     break;
                 default:
-                    requestCancellation = true;
+                    cancellationRequested = true;
                     break;
                 }
             }
         }
     }
 
+    // Check which controllers are available as this can change from frame to frame.
     void UpdateAvailableControllers()
     {
-        // Always check which controllers are available as this can change from frame to frame.
         numControllers = 0;
         controllers[numControllers].controller = CONTROLLER_KEYBOARD1;
         controllers[numControllers].description = "Left Keyboard";
@@ -239,38 +221,7 @@ namespace menu
         }
     }
 
-    ScreenState FixedUpdate()
-    {
-        UpdateAvailableControllers();
-
-        // If the number of confirmed controllers matches the number of players then start the game.
-        int numConfirmed = 0;
-        int numUnassigned = 0;
-        for (int i = 0; i < numPlayers; i++)
-        {
-            const auto& controllerAssignment = playerControllers[i];
-            if (controllerAssignment.controller == CONTROLLER_UNASSIGNED)
-            {
-                ++numUnassigned;
-            }
-            if (controllerAssignment.controller != CONTROLLER_UNASSIGNED && controllerAssignment.status == ConfirmedByPlayer)
-            {
-                if (++numConfirmed == numPlayers)
-                {
-                    return PLAYING;
-                }
-            }
-        }
-
-        if (requestCancellation && numUnassigned == numPlayers)
-        {
-            requestCancellation = false;
-            numPlayers = 0;
-        }
-
-        return MENU;
-    }
-
+    // Draw the controller selection screen.
     void DrawControllerSelection()
     {
         // Check player selections.
@@ -306,6 +257,7 @@ namespace menu
         }
     }
 
+    // Draw the screen that allows the player to determine the number of players.
     void DrawPlayerSelection()
     {
         int playerCap = numControllers >= 4 ? 4 : numControllers;
@@ -333,6 +285,68 @@ namespace menu
                 numPlayers = 4;
             }
         }
+    }
+} // namespace
+
+namespace menu
+{
+    void Start()
+    {
+        screenWidth = GetScreenWidth();
+        screenHeight = GetScreenHeight();
+
+        numPlayers = 0;
+        numControllers = 2;
+        cancellationRequested = false;
+
+        for (auto& playerController : playerControllers)
+        {
+            playerController.controller = CONTROLLER_UNASSIGNED;
+            playerController.status = Unassigned;
+            playerController.description[0] = '\0';
+        }
+    }
+
+    ControllerId GetControllerAssignment(int player)
+    {
+        return playerControllers[player].controller;
+    }
+
+    int GetNumberOfPlayers()
+    {
+        return numPlayers;
+    }
+
+    ScreenState FixedUpdate()
+    {
+        UpdateAvailableControllers();
+
+        // If the number of confirmed controllers matches the number of players then start the game.
+        int numConfirmed = 0;
+        int numUnassigned = 0;
+        for (int i = 0; i < numPlayers; i++)
+        {
+            const auto& controllerAssignment = playerControllers[i];
+            if (controllerAssignment.controller == CONTROLLER_UNASSIGNED)
+            {
+                ++numUnassigned;
+            }
+            if (controllerAssignment.controller != CONTROLLER_UNASSIGNED && controllerAssignment.status == ConfirmedByPlayer)
+            {
+                if (++numConfirmed == numPlayers)
+                {
+                    return PLAYING;
+                }
+            }
+        }
+
+        if (cancellationRequested && numUnassigned == numPlayers)
+        {
+            cancellationRequested = false;
+            numPlayers = 0;
+        }
+
+        return MENU;
     }
 
     void Draw()

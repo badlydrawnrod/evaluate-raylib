@@ -2,6 +2,10 @@
 
 #include <cmath>
 
+#if defined(PLATFORM_WEB) || defined(EMSCRIPTEN)
+#include <emscripten/emscripten.h>
+#endif
+
 namespace my
 {
     constexpr int updateFps = 60;
@@ -16,6 +20,10 @@ namespace my
         EndDrawing();
     }
 
+    void UpdateDrawFrame()
+    {
+        Draw();
+    }
 } // namespace my
 
 int main()
@@ -23,10 +31,14 @@ int main()
     InitWindow(my::screenWidth, my::screenHeight, "Empty");
     SetTargetFPS(my::updateFps);
 
+#if defined(PLATFORM_WEB) || defined(EMSCRIPTEN)
+    emscripten_set_main_loop(my::UpdateDrawFrame, 0, 1);
+#else
     while (!WindowShouldClose())
     {
-        my::Draw();
+        my::UpdateDrawFrame();
     }
+#endif
     CloseWindow();
 
     return 0;

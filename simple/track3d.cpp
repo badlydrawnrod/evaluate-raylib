@@ -1,5 +1,9 @@
 #include "raylib.h"
 
+#if defined(PLATFORM_WEB) || defined(EMSCRIPTEN)
+#include <emscripten/emscripten.h>
+#endif
+
 #include <cmath>
 
 namespace my
@@ -67,6 +71,10 @@ namespace my
         EndDrawing();
     }
 
+    void UpdateDrawFrame()
+    {
+        Draw({0, 0}, {my::virtualWidth, my::virtualHeight});
+    }
 } // namespace my
 
 int main()
@@ -77,10 +85,14 @@ int main()
     my::renderTarget = LoadRenderTexture(my::virtualWidth, my::virtualHeight);
     SetTextureFilter(my::renderTarget.texture, FILTER_ANISOTROPIC_16X);
 
+#if defined(PLATFORM_WEB) || defined(EMSCRIPTEN)
+    emscripten_set_main_loop(my::UpdateDrawFrame, 0, 1);
+#else
     while (!WindowShouldClose())
     {
-        my::Draw({0, 0}, {my::virtualWidth, my::virtualHeight});
+        my::UpdateDrawFrame();
     }
+#endif
     CloseWindow();
 
     return 0;

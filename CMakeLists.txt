@@ -38,9 +38,12 @@ if (NOT raygui_FOUND)
 
     FetchContent_Declare(
             raygui
-            GIT_REPOSITORY https://github.com/raysan5/raygui.git
+            #            GIT_REPOSITORY https://github.com/raysan5/raygui.git
+            #            GIT_SHALLOW ON
+            #            GIT_TAG master
+            GIT_REPOSITORY https://github.com/badlydrawnrod/raygui
             GIT_SHALLOW ON
-            GIT_TAG master
+            GIT_TAG patch-1
     )
 
     FetchContent_GetProperties(raygui)
@@ -60,4 +63,5 @@ endif ()
 
 set(raylib_VERBOSE 1)
 
-add_subdirectory(samples)
+add_subdirectory(simple)
+add_subdirectory(spaceships)
