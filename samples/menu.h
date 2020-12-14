@@ -10,6 +10,5 @@ namespace menu
     ScreenState FixedUpdate();
     ControllerId GetControllerAssignment(int player);
     void Start();
-
-    extern int numPlayers;
+    int GetNumberOfPlayers();
 } // namespace menu

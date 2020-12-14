@@ -54,11 +54,12 @@ namespace my
             if (state == PLAYING)
             {
                 ControllerId controllers[4];
-                for (int i = 0; i < menu::numPlayers; i++)
+                int numPlayers = menu::GetNumberOfPlayers();
+                for (int i = 0; i < numPlayers; i++)
                 {
                     controllers[i] = menu::GetControllerAssignment(i);
                 }
-                playing::Start(menu::numPlayers, controllers);
+                playing::Start(numPlayers, controllers);
             }
 
             if (state == MENU)

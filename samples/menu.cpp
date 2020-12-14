@@ -69,6 +69,11 @@ namespace menu
         return playerControllers[player].controller;
     }
 
+    int GetNumberOfPlayers()
+    {
+        return numPlayers;
+    }
+
     AssignmentStatus GetControllerStatus(ControllerId controller)
     {
         for (int i = 0; i < numPlayers; i++)
