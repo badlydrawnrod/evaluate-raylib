@@ -3,5 +3,6 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/cmake-build-emscripten-debug/_deps/raygui-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/cmake-build-emscripten-release/_deps/raygui-src" vcs="Git" />
   </component>
 </project>
