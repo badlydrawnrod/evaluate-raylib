@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.17)
 project(0x37_evaluate_raylib)
 
 set(CMAKE_C_STANDARD 99)
-set(CMAKE_CXX_STANDARD 20)
 
 include(FetchContent)
 
@@ -66,6 +65,4 @@ endif ()
 set(raylib_VERBOSE 1)
 
 add_subdirectory(simple_c)
-add_subdirectory(simple_cpp)
-add_subdirectory(spaceships)
 add_subdirectory(spaceships_c)
