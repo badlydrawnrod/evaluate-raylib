@@ -120,7 +120,7 @@ void Update(double elapsed)
     (void)elapsed;
 }
 
-void HandleEdgeTriggeredEvents(void)
+void CheckTriggers(void)
 {
     if (IsKeyPressed(KEY_F11))
     {
@@ -182,7 +182,7 @@ void UpdateDrawFrame(void)
         timing.t += timing.updateInterval;
         timing.accumulator -= timing.updateInterval;
 #if defined(EMSCRIPTEN)
-        HandleEdgeTriggeredEvents();
+        CheckTriggers();
 #endif
     }
     timing.alpha = timing.accumulator / timing.updateInterval;
@@ -199,8 +199,8 @@ void UpdateDrawFrame(void)
         Draw(timing.alpha);
         timing.lastDrawTime = now;
 #if !defined(EMSCRIPTEN)
-        HandleEdgeTriggeredEvents(); // As raylib updates input events in EndDrawing(), we update here so as to not miss
-                                     // anything edge triggered such as a keypress when we have a high frame rate.
+        CheckTriggers(); // As raylib updates input events in EndDrawing(), we update here so as to not miss
+                         // anything edge triggered such as a keypress when we have a high frame rate.
 #endif
     }
 }

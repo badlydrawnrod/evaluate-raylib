@@ -12,6 +12,7 @@
 #define SHOT_COLLISION_RADIUS (SHIP_SCALE * 0.5f)
 
 #define SHOTS_PER_PLAYER 5
+#define MAX_SHOTS (SHOTS_PER_PLAYER * MAX_PLAYERS)
 
 typedef Vector2 Position;
 typedef Vector2 Velocity;
@@ -353,7 +354,7 @@ void InitPlaying(int players, const ControllerId* controllers)
     shipColours[2] = PINK;
     shipColours[3] = SKYBLUE;
 
-    for (int i = 0; i < sizeof(ships) / sizeof(ships[0]); i++)
+    for (int i = 0; i < MAX_PLAYERS; i++)
     {
         ships[i].alive = false;
         ships[i].index = i;
@@ -371,7 +372,7 @@ void InitPlaying(int players, const ControllerId* controllers)
         ships[i].vel = (Vector2){0, 0};
     }
 
-    for (int i = 0; i < sizeof(shots) / sizeof(shots[0]); i++)
+    for (int i = 0; i < MAX_SHOTS; i++)
     {
         shots[i].alive = false;
     }
@@ -460,7 +461,7 @@ void UpdatePlaying(void)
             UpdateShip(&ships[i]);
         }
 
-        for (int i = 0; i < sizeof(shots) / sizeof(shots[0]); i++)
+        for (int i = 0; i < MAX_SHOTS; i++)
         {
             UpdateShot(&shots[i]);
         }

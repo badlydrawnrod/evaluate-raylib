@@ -2,6 +2,7 @@
 #include "spaceships.h"
 
 #define MAX_CONTROLLERS 6
+#define MAX_GAMEPADS 4
 
 typedef enum
 {
@@ -48,10 +49,10 @@ static struct
     GamepadNumber gamepadNumber; // Which raylib gamepad is this?
     ControllerId controllerId;   // Which controller is this?
     const char* description;     // What do we display to the player?
-} gamepadDescriptors[4] = {{GAMEPAD_PLAYER1, CONTROLLER_GAMEPAD1, "Gamepad 1"},
-                           {GAMEPAD_PLAYER2, CONTROLLER_GAMEPAD2, "Gamepad 2"},
-                           {GAMEPAD_PLAYER3, CONTROLLER_GAMEPAD3, "Gamepad 3"},
-                           {GAMEPAD_PLAYER4, CONTROLLER_GAMEPAD4, "Gamepad 4"}};
+} gamepadDescriptors[MAX_GAMEPADS] = {{GAMEPAD_PLAYER1, CONTROLLER_GAMEPAD1, "Gamepad 1"},
+                                      {GAMEPAD_PLAYER2, CONTROLLER_GAMEPAD2, "Gamepad 2"},
+                                      {GAMEPAD_PLAYER3, CONTROLLER_GAMEPAD3, "Gamepad 3"},
+                                      {GAMEPAD_PLAYER4, CONTROLLER_GAMEPAD4, "Gamepad 4"}};
 
 static bool cancellationRequested = false;
 static bool startRequested = false;
@@ -233,7 +234,7 @@ static void UpdateAvailableControllers(void)
     controllers[numControllers].description = "Right Keyboard";
     ++numControllers;
 
-    for (int i = 0; i < sizeof(gamepadDescriptors) / sizeof(*gamepadDescriptors); i++)
+    for (int i = 0; i < MAX_GAMEPADS; i++)
     {
         if (IsGamepadAvailable(gamepadDescriptors[i].gamepadNumber))
         {
@@ -262,7 +263,7 @@ void InitControls(void)
     cancellationRequested = false;
     startRequested = false;
 
-    for (int i = 0; i < sizeof(playerControllers) / sizeof(*playerControllers); i++)
+    for (int i = 0; i < MAX_PLAYERS; i++)
     {
         playerControllers[i].controller = CONTROLLER_UNASSIGNED;
         playerControllers[i].status = Unassigned;
@@ -394,7 +395,7 @@ void DrawControls(double alpha)
 
     for (int i = 0; i < numControllers; i++)
     {
-        for (int j = 0; j < sizeof(playerControllers) / sizeof(*playerControllers); j++)
+        for (int j = 0; j < MAX_PLAYERS; j++)
         {
             if (playerControllers[j].controller == controllers[i].controller)
             {
