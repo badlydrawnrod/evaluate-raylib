@@ -277,9 +277,11 @@ static void DrawShotAt(Vector2 pos, float heading, Color colour)
     DrawLineStrip(points, 2, colour);
 }
 
-static void DrawShip(const Ship* ship)
+static void DrawShip(const Ship* ship, double alpha)
 {
-    const Vector2 pos = ship->pos;
+    // Interpolate the ship's drawing position with its velocity to reduce stutter.
+    const Vector2 pos = Vector2Add(ship->pos, Vector2Scale(ship->vel, (float)alpha));
+
     const float heading = ship->heading;
 
     // Which edges of the play area does the ship overlap?
@@ -394,7 +396,7 @@ void DrawPlaying(double alpha)
     {
         if (ships[i].alive)
         {
-            DrawShip(&ships[i]);
+            DrawShip(&ships[i], alpha);
         }
     }
 
