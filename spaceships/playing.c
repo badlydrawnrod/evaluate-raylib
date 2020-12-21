@@ -312,9 +312,12 @@ static void DrawShip(const Ship* ship, double alpha)
     }
 }
 
-static void DrawShot(const Shot* shot, Color colour)
+static void DrawShot(const Shot* shot, Color colour, double alpha)
 {
-    DrawShotAt(shot->pos, shot->heading, colour);
+    // Interpolate the shot's drawing position with its velocity to reduce stutter.
+    const Vector2 pos = Vector2Add(shot->pos, Vector2Scale(shot->vel, (float)alpha));
+
+    DrawShotAt(pos, shot->heading, colour);
 }
 
 static void CheckKeyboard(KeyboardKey selectKey, KeyboardKey cancelKey)
@@ -406,7 +409,7 @@ void DrawPlaying(double alpha)
         if (shot->alive > 0)
         {
             Color colour = shipColours[i / SHOTS_PER_PLAYER];
-            DrawShot(shot, colour);
+            DrawShot(shot, colour, alpha);
         }
     }
 
