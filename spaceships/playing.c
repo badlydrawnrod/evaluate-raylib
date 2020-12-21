@@ -53,7 +53,7 @@ static Color shipColours[4];
 const Vector2 shipLines[] = {{-1, 1}, {0, -1}, {1, 1}, {0, 0.5f}, {-1, 1}};
 const Vector2 shotLines[] = {{0, -0.25f}, {0, 0.25f}};
 
-static const char* pausedText = "Paused. Press [FIRE] to resume";
+static const char* pausedText = "Paused";
 
 static float screenWidth;
 static float screenHeight;
@@ -397,6 +397,11 @@ void DrawPlaying(double alpha)
         DrawText(pausedText, (screenWidth - width) / 2, 7 * screenHeight / 8, 20, RAYWHITE);
     }
 
+    if (state == PAUSED)
+    {
+        alpha = 0.0;
+    }
+
     // Draw the ships.
     for (int i = 0; i < numPlayers; i++)
     {
@@ -424,6 +429,7 @@ void DrawPlaying(double alpha)
 
 void UpdatePlaying(void)
 {
+    // Check for internal state changes.
     if (state == PLAYING)
     {
         if (pauseOrQuitRequested)
@@ -446,48 +452,56 @@ void UpdatePlaying(void)
         }
     }
 
-    for (int i = 0; i < numPlayers; i++)
+    // Only update the game state when playing.
+    if (state == PLAYING)
     {
-        UpdateShip(&ships[i]);
-    }
-
-    for (int i = 0; i < sizeof(shots) / sizeof(shots[0]); i++)
-    {
-        UpdateShot(&shots[i]);
-    }
-
-    // Collide each player with the other players' shots.
-    for (int i = 0; i < numPlayers; i++)
-    {
-        for (int j = 0; j < numPlayers; j++)
+        for (int i = 0; i < numPlayers; i++)
         {
-            if (j != i)
+            UpdateShip(&ships[i]);
+        }
+
+        for (int i = 0; i < sizeof(shots) / sizeof(shots[0]); i++)
+        {
+            UpdateShot(&shots[i]);
+        }
+
+        // Collide each player with the other players' shots.
+        for (int i = 0; i < numPlayers; i++)
+        {
+            for (int j = 0; j < numPlayers; j++)
             {
-                CollideShipShots(&ships[i], j * SHOTS_PER_PLAYER, j * SHOTS_PER_PLAYER + SHOTS_PER_PLAYER);
+                if (j != i)
+                {
+                    CollideShipShots(&ships[i], j * SHOTS_PER_PLAYER, j * SHOTS_PER_PLAYER + SHOTS_PER_PLAYER);
+                }
             }
         }
-    }
 
-    // Collide each player with the other players.
-    for (int i = 0; i < numPlayers - 1; i++)
-    {
-        for (int j = i + 1; j < numPlayers; j++)
+        // Collide each player with the other players.
+        for (int i = 0; i < numPlayers - 1; i++)
         {
-            CollideShipShip(&ships[i], &ships[j]);
+            for (int j = i + 1; j < numPlayers; j++)
+            {
+                CollideShipShip(&ships[i], &ships[j]);
+            }
         }
     }
 }
 
 void CheckTriggersPlaying(void)
 {
-    CheckKeyboard(KEY_P, KEY_SPACE);
-    CheckGamepad(GAMEPAD_PLAYER1, GAMEPAD_BUTTON_MIDDLE_RIGHT, GAMEPAD_BUTTON_RIGHT_FACE_DOWN);
-    CheckGamepad(GAMEPAD_PLAYER2, GAMEPAD_BUTTON_MIDDLE_RIGHT, GAMEPAD_BUTTON_RIGHT_FACE_DOWN);
-    CheckGamepad(GAMEPAD_PLAYER3, GAMEPAD_BUTTON_MIDDLE_RIGHT, GAMEPAD_BUTTON_RIGHT_FACE_DOWN);
-    CheckGamepad(GAMEPAD_PLAYER4, GAMEPAD_BUTTON_MIDDLE_RIGHT, GAMEPAD_BUTTON_RIGHT_FACE_DOWN);
+    // Check for player(s) choosing to pause / resume / quit.
+    CheckKeyboard(KEY_P, KEY_R);
+    CheckGamepad(GAMEPAD_PLAYER1, GAMEPAD_BUTTON_MIDDLE_RIGHT, GAMEPAD_BUTTON_MIDDLE_LEFT);
+    CheckGamepad(GAMEPAD_PLAYER2, GAMEPAD_BUTTON_MIDDLE_RIGHT, GAMEPAD_BUTTON_MIDDLE_LEFT);
+    CheckGamepad(GAMEPAD_PLAYER3, GAMEPAD_BUTTON_MIDDLE_RIGHT, GAMEPAD_BUTTON_MIDDLE_LEFT);
+    CheckGamepad(GAMEPAD_PLAYER4, GAMEPAD_BUTTON_MIDDLE_RIGHT, GAMEPAD_BUTTON_MIDDLE_LEFT);
 
-    for (int i = 0; i < numPlayers; i++)
+    if (state == PLAYING)
     {
-        CheckForFire(&ships[i]);
+        for (int i = 0; i < numPlayers; i++)
+        {
+            CheckForFire(&ships[i]);
+        }
     }
 }
