@@ -1,5 +1,7 @@
 #include "constants.h"
+#include "controller_selection.h"
 #include "menu.h"
+#include "playing.h"
 #include "raygui.h"
 #include "raylib.h"
 
@@ -21,6 +23,21 @@ int renderFps = FAST_FPS;
 #else
 #define CAP_FRAME_RATE true
 #endif
+
+typedef enum
+{
+    NONE,
+    MENU,
+    CONTROLLER_SELECTION,
+    PLAYING
+} Screen;
+
+static Screen currentScreen;
+
+void InitScreens(void)
+{
+    currentScreen = NONE;
+}
 
 struct
 {
@@ -46,7 +63,54 @@ void InitTiming(void)
 
 void FixedUpdate(void)
 {
-    UpdateMenu();
+    switch (currentScreen)
+    {
+    case NONE:
+        currentScreen = MENU;
+        InitMenu();
+        break;
+    case MENU:
+        UpdateMenu();
+        if (IsStartingMenu())
+        {
+            FinishMenu();
+            currentScreen = CONTROLLER_SELECTION;
+            InitControllerSelection();
+        }
+        break;
+    case CONTROLLER_SELECTION:
+        UpdateControllerSelection();
+        if (IsStartedControllerSelection())
+        {
+            FinishControllerSelection();
+            currentScreen = PLAYING;
+            ControllerId controllers[4];
+            int numPlayers = GetNumberOfPlayers();
+            for (int i = 0; i < numPlayers; i++)
+            {
+                controllers[i] = GetControllerAssignment(i);
+            }
+            InitPlaying(numPlayers, controllers);
+        }
+        else if (IsCancelledControllerSelection())
+        {
+            FinishControllerSelection();
+            currentScreen = MENU;
+            InitMenu();
+        }
+        break;
+    case PLAYING:
+        UpdatePlaying();
+        if (IsCancelledPlaying())
+        {
+            FinishPlaying();
+            currentScreen = MENU;
+            InitMenu();
+        }
+        break;
+    default:
+        break;
+    }
 }
 
 void Update(double elapsed)
@@ -66,12 +130,38 @@ void HandleEdgeTriggeredEvents(void)
         SetTargetFPS(renderFps);
     }
 
-    HandleEdgeTriggeredEventsMenu();
+    switch (currentScreen)
+    {
+    case MENU:
+        HandleEdgeTriggeredEventsMenu();
+        break;
+    case CONTROLLER_SELECTION:
+        HandleEdgeTriggeredEventsControllerSelection();
+        break;
+    case PLAYING:
+        HandleEdgeTriggeredEventsPlaying();
+        break;
+    default:
+        break;
+    }
 }
 
 void Draw(double alpha)
 {
-    DrawMenu(alpha);
+    switch (currentScreen)
+    {
+    case MENU:
+        DrawMenu(alpha);
+        break;
+    case CONTROLLER_SELECTION:
+        DrawControllerSelection(alpha);
+        break;
+    case PLAYING:
+        DrawPlaying(alpha);
+        break;
+    default:
+        break;
+    }
 }
 
 void UpdateDrawFrame(void)
@@ -120,8 +210,7 @@ int main(void)
 
     GuiLoadStyle("assets/terminal/terminal.rgs");
     InitTiming();
-
-    InitMenu();
+    InitScreens();
 
 #if defined(PLATFORM_WEB) || defined(EMSCRIPTEN)
     emscripten_set_main_loop(UpdateDrawFrame, 0, 1);
@@ -131,7 +220,21 @@ int main(void)
         UpdateDrawFrame();
     }
 #endif
-    FiniMenu();
+
+    // Workaround until I make a decision on resource management.
+    switch (currentScreen)
+    {
+    case MENU:
+        FinishMenu();
+        break;
+    case CONTROLLER_SELECTION:
+        FinishControllerSelection();
+        break;
+    case PLAYING:
+        FinishPlaying();
+    default:
+        break;
+    }
 
     CloseWindow();
 

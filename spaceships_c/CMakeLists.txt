@@ -8,7 +8,7 @@ if (EMSCRIPTEN)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --preload-file ${CMAKE_CURRENT_BINARY_DIR}/assets@assets/")
 endif ()
 
-add_executable(${PROJECT_NAME} spaceships.c raygui.c menu.c menu.h)
+add_executable(${PROJECT_NAME} spaceships.c raygui.c controller_selection.c controller_selection.h menu.c menu.h playing.c playing.h controllers.h)
 target_include_directories(${PROJECT_NAME} INTERFACE raygui)
 target_link_libraries(${PROJECT_NAME} raylib raygui)
 

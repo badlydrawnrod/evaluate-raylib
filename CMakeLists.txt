@@ -12,10 +12,10 @@ if (NOT raylib_FOUND)
 
     FetchContent_Declare(
             raylib
-            URL https://github.com/raysan5/raylib/archive/master.tar.gz
-            # If master is broken for some reason then uncomment this.
-            #            GIT_REPOSITORY ${CMAKE_SOURCE_DIR}/../3rdparty/raylib
-            #            GIT_TAG rod
+            #            URL https://github.com/raysan5/raylib/archive/master.tar.gz
+            If master is broken for some reason then uncomment this.
+            GIT_REPOSITORY ${CMAKE_SOURCE_DIR}/../3rdparty/raylib
+            GIT_TAG rod2
     )
     FetchContent_GetProperties(raylib)
 
@@ -39,9 +39,13 @@ if (NOT raygui_FOUND)
 
     FetchContent_Declare(
             raygui
-            GIT_REPOSITORY https://github.com/raysan5/raygui.git
+            # If master is broken for some reason then uncomment this.
+            GIT_REPOSITORY ${CMAKE_SOURCE_DIR}/../3rdparty/raygui
             GIT_SHALLOW ON
-            GIT_TAG master
+            GIT_TAG fix-sscanf
+            #            GIT_REPOSITORY https://github.com/raysan5/raygui.git
+            #            GIT_SHALLOW ON
+            #            GIT_TAG master
     )
 
     FetchContent_GetProperties(raygui)
