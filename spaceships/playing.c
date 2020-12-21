@@ -411,7 +411,6 @@ void DrawPlaying(double alpha)
         }
     }
 
-    //    // TODO: draw this properly (or use something from raygui if that works better) based on the number of players.
     //    float fontSize = scoreFont.baseSize;
     //    DrawTextEx(scoreFont, "PLAYER 1", {8, 4}, fontSize, 2, shipColours[0]);
     //    DrawTextEx(scoreFont, " 000100", {8, 40}, fontSize, 2, shipColours[0]);

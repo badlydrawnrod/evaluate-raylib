@@ -16,6 +16,8 @@ endif ()
 
 foreach (simple_source ${simple_sources})
     get_filename_component(sample_name ${simple_source} NAME)
+    string(REPLACE ".c" "" sample_name ${sample_name})
+
     add_executable(${sample_name} ${simple_source})
     target_link_libraries(${sample_name} raylib)
 endforeach ()

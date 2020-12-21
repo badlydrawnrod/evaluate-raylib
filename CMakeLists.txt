@@ -31,38 +31,7 @@ if (NOT raylib_FOUND)
     endif ()
 endif ()
 
-
-# Obtain raygui if we don't already have it.
-find_package(raygui QUIET)
-if (NOT raygui_FOUND)
-
-    FetchContent_Declare(
-            raygui
-            # If master is broken for some reason then uncomment this.
-            GIT_REPOSITORY ${CMAKE_SOURCE_DIR}/../3rdparty/raygui
-            GIT_SHALLOW ON
-            GIT_TAG fix-sscanf
-            #            GIT_REPOSITORY https://github.com/raysan5/raygui.git
-            #            GIT_SHALLOW ON
-            #            GIT_TAG master
-    )
-
-    FetchContent_GetProperties(raygui)
-
-    # Download and build raygui.
-    if (NOT raygui_POPULATED)
-        set(FETCHCONTENT_QUIET NO)
-        FetchContent_Populate(raygui)
-
-        # Don't build the raygui examples.
-        set(BUILD_RAYGUI_EXAMPLES OFF CACHE BOOL "" FORCE)
-
-        # Build raygui.
-        add_subdirectory(${raygui_SOURCE_DIR}/projects/CMake ${raygui_BINARY_DIR})
-    endif ()
-endif ()
-
 set(raylib_VERBOSE 1)
 
-add_subdirectory(simple_c)
-add_subdirectory(spaceships_c)
+add_subdirectory(simple)
+add_subdirectory(spaceships)

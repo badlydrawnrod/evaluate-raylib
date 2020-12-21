@@ -1,8 +1,6 @@
-#include "constants.h"
 #include "controller_selection.h"
 #include "menu.h"
 #include "playing.h"
-#include "raygui.h"
 #include "raylib.h"
 
 #if defined(PLATFORM_WEB) || defined(EMSCRIPTEN)
@@ -10,6 +8,11 @@
 #endif
 
 #include <math.h>
+
+#define SCREEN_WIDTH 1280
+#define SCREEN_HEIGHT 720
+
+#define UPDATE_FPS 50
 
 #define SLOW_FPS 60
 #define FAST_FPS 240
@@ -208,7 +211,6 @@ int main(void)
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Spaceships");
     SetTargetFPS(renderFps);
 
-    GuiLoadStyle("assets/terminal/terminal.rgs");
     InitTiming();
     InitScreens();
 

@@ -1,4 +1,4 @@
-project(spaceships_c)
+project(spaceships)
 
 if (EMSCRIPTEN)
     set(CMAKE_EXECUTABLE_SUFFIX ".html")
@@ -10,9 +10,8 @@ if (EMSCRIPTEN)
     endif ()
 endif ()
 
-add_executable(${PROJECT_NAME} spaceships.c raygui.c controller_selection.c controller_selection.h menu.c menu.h playing.c playing.h controllers.h)
-target_include_directories(${PROJECT_NAME} INTERFACE raygui)
-target_link_libraries(${PROJECT_NAME} raylib raygui)
+add_executable(${PROJECT_NAME} spaceships.c controller_selection.c controller_selection.h menu.c menu.h playing.c playing.h controllers.h)
+target_link_libraries(${PROJECT_NAME} raylib)
 
 set(spaceships_assets)
 file(GLOB assets assets/*)

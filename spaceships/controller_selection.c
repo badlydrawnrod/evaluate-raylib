@@ -1,9 +1,7 @@
 #include "controller_selection.h"
 
-#include "constants.h"
-#include "raygui.h"
-#include "raylib.h"
 #include "controllers.h"
+#include "raylib.h"
 
 #define MAX_PLAYERS 4
 #define MAX_CONTROLLERS 6
@@ -398,20 +396,18 @@ void DrawControllerSelection(double alpha)
 
     for (int i = 0; i < numControllers; i++)
     {
-        char description[128];
-        int bytes = TextCopy(description, TextFormat("%-15s", controllers[i].description));
-
         for (int j = 0; j < sizeof(playerControllers) / sizeof(*playerControllers); j++)
         {
             if (playerControllers[j].controller == controllers[i].controller)
             {
-                bytes += TextCopy(description + bytes, "\n");
-                TextCopy(description + bytes, playerControllers[j].description);
-                GuiLabel((Rectangle){i * width + margin, screenHeight / 2.0f, controlWidth, screenHeight / 8.0f},
-                         playerControllers[j].description);
+                DrawTextRec(scoreFont, playerControllers[j].description,
+                            (Rectangle){i * width + margin, 40.0f + screenHeight / 2.0f, controlWidth, screenHeight / 8.0f}, 32, 2,
+                            false, YELLOW);
             }
         }
-        GuiButton((Rectangle){i * width + margin, screenHeight / 2.0f, controlWidth, screenHeight / 8.0f}, description);
+        DrawTextRec(scoreFont, TextFormat("%-15s", controllers[i].description),
+                    (Rectangle){i * width + margin, screenHeight / 2.0f, controlWidth, screenHeight / 8.0f}, 32, 2, false,
+                    RAYWHITE);
     }
 
     if (state == STARTABLE)
