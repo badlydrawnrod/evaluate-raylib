@@ -1,6 +1,5 @@
-#include "controller_selection.h"
-#include "menu.h"
-#include "playing.h"
+#include "spaceships.h"
+
 #include "raylib.h"
 
 #if defined(PLATFORM_WEB) || defined(EMSCRIPTEN)
@@ -78,14 +77,14 @@ void FixedUpdate(void)
         {
             FinishMenu();
             currentScreen = CONTROLLER_SELECTION;
-            InitControllerSelection();
+            InitControls();
         }
         break;
     case CONTROLLER_SELECTION:
-        UpdateControllerSelection();
-        if (IsStartedControllerSelection())
+        UpdateControls();
+        if (IsStartedControls())
         {
-            FinishControllerSelection();
+            FinishControls();
             currentScreen = PLAYING;
             ControllerId controllers[4];
             int numPlayers = GetNumberOfPlayers();
@@ -95,9 +94,9 @@ void FixedUpdate(void)
             }
             InitPlaying(numPlayers, controllers);
         }
-        else if (IsCancelledControllerSelection())
+        else if (IsCancelledControls())
         {
-            FinishControllerSelection();
+            FinishControls();
             currentScreen = MENU;
             InitMenu();
         }
@@ -136,13 +135,13 @@ void HandleEdgeTriggeredEvents(void)
     switch (currentScreen)
     {
     case MENU:
-        HandleEdgeTriggeredEventsMenu();
+        CheckTriggersMenu();
         break;
     case CONTROLLER_SELECTION:
-        HandleEdgeTriggeredEventsControllerSelection();
+        CheckTriggersControls();
         break;
     case PLAYING:
-        HandleEdgeTriggeredEventsPlaying();
+        CheckTriggersPlaying();
         break;
     default:
         break;
@@ -157,7 +156,7 @@ void Draw(double alpha)
         DrawMenu(alpha);
         break;
     case CONTROLLER_SELECTION:
-        DrawControllerSelection(alpha);
+        DrawControls(alpha);
         break;
     case PLAYING:
         DrawPlaying(alpha);
@@ -230,7 +229,7 @@ int main(void)
         FinishMenu();
         break;
     case CONTROLLER_SELECTION:
-        FinishControllerSelection();
+        FinishControls();
         break;
     case PLAYING:
         FinishPlaying();

@@ -1,6 +1,5 @@
-#include "menu.h"
-
 #include "raylib.h"
+#include "spaceships.h"
 
 typedef enum
 {
@@ -60,7 +59,7 @@ void UpdateMenu(void)
     }
 }
 
-void HandleEdgeTriggeredEventsMenu(void)
+void CheckTriggersMenu(void)
 {
     CheckKeyboard(KEY_SPACE);
     CheckKeyboard(KEY_ENTER);

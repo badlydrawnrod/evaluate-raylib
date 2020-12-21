@@ -1,8 +1,6 @@
-#include "playing.h"
-
-#include "controllers.h"
 #include "raylib.h"
 #include "raymath.h"
+#include "spaceships.h"
 
 #define SHIP_SCALE 16.0f
 #define SHIP_OVERLAP (2 * SHIP_SCALE)
@@ -13,7 +11,6 @@
 #define SHIP_COLLISION_RADIUS SHIP_SCALE
 #define SHOT_COLLISION_RADIUS (SHIP_SCALE * 0.5f)
 
-#define MAX_PLAYERS 4
 #define SHOTS_PER_PLAYER 5
 
 typedef Vector2 Position;
@@ -488,7 +485,7 @@ void UpdatePlaying(void)
     }
 }
 
-void HandleEdgeTriggeredEventsPlaying(void)
+void CheckTriggersPlaying(void)
 {
     CheckKeyboard(KEY_P, KEY_SPACE);
     CheckGamepad(GAMEPAD_PLAYER1, GAMEPAD_BUTTON_MIDDLE_RIGHT, GAMEPAD_BUTTON_RIGHT_FACE_DOWN);

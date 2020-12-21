@@ -10,7 +10,7 @@ if (EMSCRIPTEN)
     endif ()
 endif ()
 
-add_executable(${PROJECT_NAME} spaceships.c controller_selection.c controller_selection.h menu.c menu.h playing.c playing.h controllers.h)
+add_executable(${PROJECT_NAME} spaceships.c controls.c menu.c playing.c spaceships.h)
 target_link_libraries(${PROJECT_NAME} raylib)
 
 set(spaceships_assets)

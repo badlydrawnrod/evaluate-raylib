@@ -1,9 +1,6 @@
-#include "controller_selection.h"
-
-#include "controllers.h"
 #include "raylib.h"
+#include "spaceships.h"
 
-#define MAX_PLAYERS 4
 #define MAX_CONTROLLERS 6
 
 typedef enum
@@ -34,7 +31,7 @@ static float screenHeight;
 
 static int maxPlayers = 0;
 static int numPlayers = 0;
-PlayerController playerControllers[MAX_PLAYERS];
+static PlayerController playerControllers[MAX_PLAYERS];
 
 static int numControllers = 0;
 
@@ -251,7 +248,7 @@ static void UpdateAvailableControllers(void)
     }
 }
 
-void InitControllerSelection(void)
+void InitControls(void)
 {
     scoreFont = LoadFont("assets/terminal/Mecha.ttf");
     screenWidth = GetScreenWidth();
@@ -273,22 +270,22 @@ void InitControllerSelection(void)
     }
 }
 
-void FinishControllerSelection(void)
+void FinishControls(void)
 {
     UnloadFont(scoreFont);
 }
 
-bool IsCancelledControllerSelection(void)
+bool IsCancelledControls(void)
 {
     return state == CANCELLED;
 }
 
-bool IsStartedControllerSelection(void)
+bool IsStartedControls(void)
 {
     return state == STARTING;
 }
 
-void HandleEdgeTriggeredEventsControllerSelection(void)
+void CheckTriggersControls(void)
 {
     // Check player selections.
     CheckKeyboard(KEY_SPACE, KEY_W, CONTROLLER_KEYBOARD1);
@@ -309,7 +306,7 @@ int GetNumberOfPlayers(void)
     return numPlayers;
 }
 
-void UpdateControllerSelection(void)
+void UpdateControls(void)
 {
     int oldNumControllers = numControllers;
     int oldMaxPlayers = maxPlayers;
@@ -380,7 +377,7 @@ void UpdateControllerSelection(void)
     }
 }
 
-void DrawControllerSelection(double alpha)
+void DrawControls(double alpha)
 {
     ClearBackground(BLACK);
     BeginDrawing();
