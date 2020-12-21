@@ -395,6 +395,7 @@ void DrawPlaying(double alpha)
         DrawText(pausedText, (screenWidth - width) / 2, 7 * screenHeight / 8, 20, RAYWHITE);
     }
 
+    // Draw the ships.
     for (int i = 0; i < numPlayers; i++)
     {
         if (ships[i].alive)
@@ -403,6 +404,7 @@ void DrawPlaying(double alpha)
         }
     }
 
+    // Draw the shots.
     for (int i = 0; i < numPlayers * SHOTS_PER_PLAYER; i++)
     {
         const Shot* shot = &shots[i];
@@ -412,22 +414,6 @@ void DrawPlaying(double alpha)
             DrawShot(shot, colour, alpha);
         }
     }
-
-    //    float fontSize = scoreFont.baseSize;
-    //    DrawTextEx(scoreFont, "PLAYER 1", {8, 4}, fontSize, 2, shipColours[0]);
-    //    DrawTextEx(scoreFont, " 000100", {8, 40}, fontSize, 2, shipColours[0]);
-    //    DrawTextEx(scoreFont, "PLAYER 2", {screenWidth - 128, 4}, fontSize, 2, shipColours[1]);
-    //    DrawTextEx(scoreFont, " 000200", {screenWidth - 128, 40}, fontSize, 2, shipColours[1]);
-    //    if (numPlayers >= 3)
-    //    {
-    //        DrawTextEx(scoreFont, "PLAYER 3", {8, screenHeight - 76}, fontSize, 2, shipColours[2]);
-    //        DrawTextEx(scoreFont, " 000300", {8, screenHeight - 40}, fontSize, 2, shipColours[2]);
-    //    }
-    //    if (numPlayers == 4)
-    //    {
-    //        DrawTextEx(scoreFont, "PLAYER 4", {screenWidth - 128, screenHeight - 76}, fontSize, 2, shipColours[3]);
-    //        DrawTextEx(scoreFont, " 000400", {screenWidth - 128, screenHeight - 40}, fontSize, 2, shipColours[3]);
-    //    }
 
     DrawFPS(screenWidth / 2 - 16, screenHeight - 24);
 
