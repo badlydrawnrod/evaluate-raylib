@@ -7,8 +7,8 @@ typedef enum
     STARTING
 } MenuState;
 
-static float screenWidth;
-static float screenHeight;
+static int screenWidth;
+static int screenHeight;
 
 static bool startRequested;
 static MenuState state;
@@ -43,6 +43,7 @@ bool IsStartingMenu(void)
 
 void DrawMenu(double alpha)
 {
+    (void)alpha;
     ClearBackground(BLACK);
     BeginDrawing();
     DrawText("MENU", 4, 4, 20, RAYWHITE);

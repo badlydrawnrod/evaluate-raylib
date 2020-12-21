@@ -1,5 +1,13 @@
 project(spaceships)
 
+if (MSVC)
+    # Warning level 4 and all warnings as errors.
+    add_compile_options(/W4 /WX)
+else ()
+    # Lots of warnings and all warnings as errors.
+    add_compile_options(-Wall -Wextra -pedantic -Werror)
+endif ()
+
 if (EMSCRIPTEN)
     set(CMAKE_EXECUTABLE_SUFFIX ".html")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Os -s USE_GLFW=3 -s ASSERTIONS=1 -s WASM=1 -s USE_WEBGL2=1")

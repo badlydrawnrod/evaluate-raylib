@@ -117,6 +117,7 @@ void FixedUpdate(void)
 
 void Update(double elapsed)
 {
+    (void)elapsed;
 }
 
 void HandleEdgeTriggeredEvents(void)

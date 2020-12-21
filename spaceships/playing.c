@@ -7,7 +7,7 @@
 #define MAX_ROTATION_SPEED 4.0f
 #define SPEED 0.1f
 #define SHOT_SPEED 6.0f
-#define SHOT_DURATION 90.0f
+#define SHOT_DURATION 90
 #define SHIP_COLLISION_RADIUS SHIP_SCALE
 #define SHOT_COLLISION_RADIUS (SHIP_SCALE * 0.5f)
 
@@ -55,8 +55,8 @@ const Vector2 shotLines[] = {{0, -0.25f}, {0, 0.25f}};
 
 static const char* pausedText = "Paused";
 
-static float screenWidth;
-static float screenHeight;
+static int screenWidth;
+static int screenHeight;
 
 static bool pauseOrQuitRequested;
 static bool resumeRequested;
@@ -278,9 +278,9 @@ static void DrawShip(const Ship* ship, double alpha)
 
     // Which edges of the play area does the ship overlap?
     const bool overlapsTop = pos.y - SHIP_OVERLAP < 0;
-    const bool overlapsBottom = pos.y + SHIP_OVERLAP >= screenHeight;
+    const bool overlapsBottom = pos.y + SHIP_OVERLAP >= (float)screenHeight;
     const bool overlapsLeft = pos.x - SHIP_OVERLAP < 0;
-    const bool overlapsRight = pos.x + SHIP_OVERLAP >= screenWidth;
+    const bool overlapsRight = pos.x + SHIP_OVERLAP >= (float)screenWidth;
 
     Color shipColour = shipColours[ship->index];
 
@@ -288,19 +288,19 @@ static void DrawShip(const Ship* ship, double alpha)
 
     if (overlapsTop)
     {
-        DrawShipAt(Vector2Add(pos, (Vector2){0, screenHeight}), heading, shipColour);
+        DrawShipAt(Vector2Add(pos, (Vector2){0, (float)screenHeight}), heading, shipColour);
     }
     if (overlapsBottom)
     {
-        DrawShipAt(Vector2Add(pos, (Vector2){0, -screenHeight}), heading, shipColour);
+        DrawShipAt(Vector2Add(pos, (Vector2){0, (float)-screenHeight}), heading, shipColour);
     }
     if (overlapsLeft)
     {
-        DrawShipAt(Vector2Add(pos, (Vector2){screenWidth, 0}), heading, shipColour);
+        DrawShipAt(Vector2Add(pos, (Vector2){(float)screenWidth, 0}), heading, shipColour);
     }
     if (overlapsRight)
     {
-        DrawShipAt(Vector2Add(pos, (Vector2){-screenWidth, 0}), heading, shipColour);
+        DrawShipAt(Vector2Add(pos, (Vector2){(float)-screenWidth, 0}), heading, shipColour);
     }
 }
 

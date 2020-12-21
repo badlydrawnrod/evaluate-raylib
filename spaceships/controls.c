@@ -26,8 +26,8 @@ typedef struct
     char description[16];    // Description of the controller's status and assignment.
 } PlayerController;
 
-static float screenWidth;
-static float screenHeight;
+static int screenWidth;
+static int screenHeight;
 
 static int maxPlayers = 0;
 static int numPlayers = 0;
@@ -379,13 +379,14 @@ void UpdateControls(void)
 
 void DrawControls(double alpha)
 {
+    (void)alpha;
     ClearBackground(BLACK);
     BeginDrawing();
 
     DrawText("CONTROLLER SELECTION", 4, 4, 20, RAYWHITE);
 
     // Draw the controllers and whether they're unassigned, assigned, or confirmed.
-    float width = screenWidth / numControllers;
+    float width = (float)screenWidth / numControllers;
     float controlWidth = width * 0.75f;
     float margin = (width - controlWidth) / 2;
 
@@ -403,15 +404,15 @@ void DrawControls(double alpha)
             }
         }
         DrawTextRec(scoreFont, TextFormat("%-15s", controllers[i].description),
-                    (Rectangle){i * width + margin, screenHeight / 2.0f, controlWidth, screenHeight / 8.0f}, 32, 2, false,
-                    RAYWHITE);
+                    (Rectangle){i * width + margin, (float)screenHeight / 2.0f, controlWidth, (float)screenHeight / 8.0f}, 32, 2,
+                    false, RAYWHITE);
     }
 
     if (state == STARTABLE)
     {
         Vector2 size = MeasureTextEx(scoreFont, TextFormat("Start %d player game", numPlayers), 32, 2);
-        Vector2 position = (Vector2){(screenWidth - size.x) / 2, 7 * screenHeight / 8};
-        DrawTextEx(scoreFont, TextFormat("Start %d player game", numPlayers), position, 32, 2, YELLOW);
+        Vector2 position = (Vector2){((float)screenWidth - size.x) / 2, 7 * (float)screenHeight / 8};
+        DrawTextEx(scoreFont, TextFormat("Start %d player game", numPlayers), position, 32, 2, LIME);
     }
 
     EndDrawing();
