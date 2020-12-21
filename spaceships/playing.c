@@ -125,37 +125,39 @@ static float GetControllerTurnRate(int controller)
     }
 }
 
-static void Move(Position* pos, Velocity vel)
+static Vector2 Move(Position pos, Velocity vel)
 {
-    *pos = Vector2Add(*pos, vel);
+    pos = Vector2Add(pos, vel);
 
     // Wrap the position around the play area.
-    if (pos->x >= screenWidth)
+    if (pos.x >= screenWidth)
     {
-        pos->x -= screenWidth;
+        pos.x -= screenWidth;
     }
-    if (pos->x < 0)
+    if (pos.x < 0)
     {
-        pos->x += screenWidth;
+        pos.x += screenWidth;
     }
-    if (pos->y >= screenHeight)
+    if (pos.y >= screenHeight)
     {
-        pos->y -= screenHeight;
+        pos.y -= screenHeight;
     }
-    if (pos->y < 0)
+    if (pos.y < 0)
     {
-        pos->y += screenHeight;
+        pos.y += screenHeight;
     }
+
+    return pos;
 }
 
 static void MoveShip(Ship* ship)
 {
-    Move(&ship->pos, ship->vel);
+    ship->pos = Move(ship->pos, ship->vel);
 }
 
 static void MoveShot(Shot* shot)
 {
-    Move(&shot->pos, shot->vel);
+    shot->pos = Move(shot->pos, shot->vel);
 }
 
 static void CollideShipShot(Ship* ship, Shot* shot)
@@ -267,16 +269,6 @@ static void DrawShipAt(Vector2 pos, float heading, Color colour)
     DrawLineStrip(points, 5, colour);
 }
 
-static void DrawShotAt(Vector2 pos, float heading, Color colour)
-{
-    Vector2 points[2];
-    for (int i = 0; i < 2; i++)
-    {
-        points[i] = Vector2Add(Vector2Scale(Vector2Rotate(shotLines[i], heading), SHIP_SCALE), pos);
-    }
-    DrawLineStrip(points, 2, colour);
-}
-
 static void DrawShip(const Ship* ship, double alpha)
 {
     // Interpolate the ship's drawing position with its velocity to reduce stutter.
@@ -310,6 +302,16 @@ static void DrawShip(const Ship* ship, double alpha)
     {
         DrawShipAt(Vector2Add(pos, (Vector2){-screenWidth, 0}), heading, shipColour);
     }
+}
+
+static void DrawShotAt(Vector2 pos, float heading, Color colour)
+{
+    Vector2 points[2];
+    for (int i = 0; i < 2; i++)
+    {
+        points[i] = Vector2Add(Vector2Scale(Vector2Rotate(shotLines[i], heading), SHIP_SCALE), pos);
+    }
+    DrawLineStrip(points, 2, colour);
 }
 
 static void DrawShot(const Shot* shot, Color colour, double alpha)
