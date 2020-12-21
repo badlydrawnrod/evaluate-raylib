@@ -300,7 +300,7 @@ static void DrawShip(const Ship* ship, double alpha)
     }
     if (overlapsBottom)
     {
-        DrawShipAt(Vector2Add(pos, (Vector2){0, screenHeight}), heading, shipColour);
+        DrawShipAt(Vector2Add(pos, (Vector2){0, -screenHeight}), heading, shipColour);
     }
     if (overlapsLeft)
     {
