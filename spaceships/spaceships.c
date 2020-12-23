@@ -18,8 +18,6 @@
 
 #define MAX_DELTA 0.1f
 
-int renderFps = FAST_FPS;
-
 #if defined(EMSCRIPTEN)
 #define CAP_FRAME_RATE 0
 #else
@@ -34,14 +32,7 @@ typedef enum
     PLAYING
 } Screen;
 
-static Screen currentScreen;
-
-void InitScreens(void)
-{
-    currentScreen = NONE;
-}
-
-struct
+static struct
 {
     double t;              // Physics time.
     double updateInterval; // Desired fixed update interval (seconds).
@@ -52,7 +43,15 @@ struct
     double lastDrawTime;   // When did we last draw?
 } timing;
 
-void InitTiming(void)
+static int renderFps = FAST_FPS;
+static Screen currentScreen;
+
+void InitScreens(void)
+{
+    currentScreen = NONE;
+}
+
+static void InitTiming(void)
 {
     timing.t = 0.0;
     timing.updateInterval = 1.0 / UPDATE_FPS;
@@ -67,7 +66,7 @@ void InitTiming(void)
     timing.lastDrawTime = timing.lastTime;
 }
 
-void FixedUpdate(void)
+static void FixedUpdate(void)
 {
     switch (currentScreen)
     {
@@ -90,7 +89,7 @@ void FixedUpdate(void)
         {
             FinishControlsScreen();
             currentScreen = PLAYING;
-            ControllerId controllers[4];
+            ControllerId controllers[MAX_PLAYERS];
             int numPlayers = GetNumberOfPlayers();
             for (int i = 0; i < numPlayers; i++)
             {
@@ -119,12 +118,12 @@ void FixedUpdate(void)
     }
 }
 
-void Update(double elapsed)
+static void Update(double elapsed)
 {
     (void)elapsed;
 }
 
-void CheckTriggers(void)
+static void CheckTriggers(void)
 {
     if (IsKeyPressed(KEY_F11))
     {
@@ -153,7 +152,7 @@ void CheckTriggers(void)
     }
 }
 
-void Draw(double alpha)
+static void Draw(double alpha)
 {
     switch (currentScreen)
     {
@@ -171,7 +170,7 @@ void Draw(double alpha)
     }
 }
 
-void UpdateDrawFrame(void)
+static void UpdateDrawFrame(void)
 {
 #if defined(__EMSCRIPTEN__)
     // For web builds we only need to check for edge-triggered events once per frame.
