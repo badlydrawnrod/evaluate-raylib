@@ -1,22 +1,25 @@
 #include "raylib.h"
 #include "spaceships.h"
 
-#define MAX_CONTROLLERS 6
+#define MAX_KEYBOARDS 2
 #define MAX_GAMEPADS 4
+#define MAX_CONTROLLERS (MAX_KEYBOARDS + MAX_GAMEPADS)
 
+// Screen states.
 typedef enum
 {
     WAITING,
     STARTABLE,
     STARTING,
     CANCELLED
-} ControllerSelectionState;
+} ControlsState;
 
-typedef enum AssignmentStatus
+// Controller assignment status.
+typedef enum
 {
-    Unassigned,
-    AssignedToPlayer,
-    ConfirmedByPlayer
+    UNASSIGNED,
+    ASSIGNED_TO_PLAYER,
+    CONFIRMED_BY_PLAYER
 } AssignmentStatus;
 
 // Player controllers and how they're assigned.
@@ -24,7 +27,6 @@ typedef struct
 {
     ControllerId controller; // Which controller is assigned to this player, if any?
     AssignmentStatus status; // What's the status of this controller?
-    char description[16];    // Description of the controller's status and assignment.
 } PlayerController;
 
 static int screenWidth;
@@ -35,6 +37,8 @@ static int numPlayers = 0;
 static PlayerController playerControllers[MAX_PLAYERS];
 
 static int numControllers = 0;
+static int numAssigned = 0;
+static int numConfirmed = 0;
 static int numActive = 0;
 
 static Font scoreFont;
@@ -42,34 +46,39 @@ static Font scoreFont;
 // Currently available controllers.
 static struct
 {
-    ControllerId controller;           // The controller id, e.g., CONTROLLER_GAMEPAD1.
-    const char* description;           // The controller's description, e.g., "Gamepad 1".
-    const char* cancelDescription;     // Tell the player how to cancel.
-    const char* unassignedDescription; // The description to show when the controller is not assigned.
-    const char* assignedDescription;   // The description to show when the controller is assigned.
-    const char* confirmedDescription;  // The description to show when the controller is confirmed.
+    ControllerId controller;       // The controller id, e.g., CONTROLLER_GAMEPAD1.
+    const char* description;       // The controller's description, e.g., "Gamepad 1".
+    const char* cancelDescription; // Tell the player how to cancel.
+    const char* selectDescription; // Tell the player how to select.
 } controllers[MAX_CONTROLLERS];
+
+// Keyboard information.
+static struct
+{
+    ControllerId controllerId;     // Which controller is this?
+    const char* description;       // What do we display to the player?
+    const char* cancelDescription; // Tell the player how to cancel.
+    const char* selectDescription; // Tell the player how to select.
+} keyboardDescriptors[MAX_KEYBOARDS] = {{CONTROLLER_KEYBOARD1, "Left keyboard", "[W]", "[S]"},
+                                        {CONTROLLER_KEYBOARD2, "Right keyboard", "[Up]", "[Down]"}};
 
 // Gamepad information.
 static struct
 {
-    GamepadNumber gamepadNumber;       // Which raylib gamepad is this?
-    ControllerId controllerId;         // Which controller is this?
-    const char* description;           // What do we display to the player?
-    const char* cancelDescription;     // Tell the player how to cancel.
-    const char* unassignedDescription; // The description to show when the gamepad is not assigned.
-    const char* assignedDescription;   // The description to show when the gamepad is assigned.
-    const char* confirmedDescription;  // The description to show when the gamepad is confirmed.
-} gamepadDescriptors[MAX_GAMEPADS] = {
-        {GAMEPAD_PLAYER1, CONTROLLER_GAMEPAD1, "Gamepad 1", "[B]", "[A] Select", "[A] Confirm", "[A] Start\nPlayers = %d"},
-        {GAMEPAD_PLAYER2, CONTROLLER_GAMEPAD2, "Gamepad 2", "[B]", "[A] Select", "[A] Confirm", "[A] Start\nPlayers = %d"},
-        {GAMEPAD_PLAYER3, CONTROLLER_GAMEPAD3, "Gamepad 3", "[B]", "[A] Select", "[A] Confirm", "[A] Start\nPlayers = %d"},
-        {GAMEPAD_PLAYER4, CONTROLLER_GAMEPAD4, "Gamepad 4", "[B]", "[A] Select", "[A] Confirm", "[A] Start\nPlayers = %d"}};
+    GamepadNumber gamepadNumber;   // Which raylib gamepad is this?
+    ControllerId controllerId;     // Which controller is this?
+    const char* description;       // What do we display to the player?
+    const char* cancelDescription; // Tell the player how to cancel.
+    const char* selectDescription; // Tell the player how to select.
+} gamepadDescriptors[MAX_GAMEPADS] = {{GAMEPAD_PLAYER1, CONTROLLER_GAMEPAD1, "Gamepad 1", "(B)", "(A)"},
+                                      {GAMEPAD_PLAYER2, CONTROLLER_GAMEPAD2, "Gamepad 2", "(B)", "(A)"},
+                                      {GAMEPAD_PLAYER3, CONTROLLER_GAMEPAD3, "Gamepad 3", "(B)", "(A)"},
+                                      {GAMEPAD_PLAYER4, CONTROLLER_GAMEPAD4, "Gamepad 4", "(B)", "(A)"}};
 
 static bool cancellationRequested = false;
 static bool startRequested = false;
 static bool canCancel = true;
-static ControllerSelectionState state;
+static ControlsState state;
 
 static int MinInt(int a, int b)
 {
@@ -86,7 +95,7 @@ static AssignmentStatus GetControllerStatus(ControllerId controller)
             return playerControllers[i].status;
         }
     }
-    return Unassigned;
+    return UNASSIGNED;
 }
 
 // Assign a controller.
@@ -94,11 +103,10 @@ static void AssignController(ControllerId controller)
 {
     for (int i = 0; i < maxPlayers; i++)
     {
-        if (playerControllers[i].status == Unassigned)
+        if (playerControllers[i].status == UNASSIGNED)
         {
             playerControllers[i].controller = controller;
-            playerControllers[i].status = AssignedToPlayer;
-            TextCopy(playerControllers[i].description, TextFormat("Assigned [P%d]", i + 1));
+            playerControllers[i].status = ASSIGNED_TO_PLAYER;
             return;
         }
     }
@@ -109,16 +117,15 @@ static void UnassignController(ControllerId controller)
 {
     for (int i = 0; i < maxPlayers; i++)
     {
-        if (playerControllers[i].controller == controller && playerControllers[i].status != Unassigned)
+        if (playerControllers[i].controller == controller && playerControllers[i].status != UNASSIGNED)
         {
-            if (playerControllers[i].status == ConfirmedByPlayer)
+            if (playerControllers[i].status == CONFIRMED_BY_PLAYER)
             {
                 --numPlayers;
                 TraceLog(LOG_INFO, TextFormat("There are now %d players", numPlayers));
             }
             playerControllers[i].controller = CONTROLLER_UNASSIGNED;
-            playerControllers[i].status = Unassigned;
-            TextCopy(playerControllers[i].description, "");
+            playerControllers[i].status = UNASSIGNED;
             return;
         }
     }
@@ -129,10 +136,9 @@ static void ConfirmController(ControllerId controller)
 {
     for (int i = 0; i < maxPlayers; i++)
     {
-        if (playerControllers[i].controller == controller && playerControllers[i].status == AssignedToPlayer)
+        if (playerControllers[i].controller == controller && playerControllers[i].status == ASSIGNED_TO_PLAYER)
         {
-            playerControllers[i].status = ConfirmedByPlayer;
-            TextCopy(playerControllers[i].description, TextFormat("Confirmed [P%d]", i + 1));
+            playerControllers[i].status = CONFIRMED_BY_PLAYER;
             ++numPlayers;
             TraceLog(LOG_INFO, TextFormat("There are now %d players", numPlayers));
         }
@@ -144,10 +150,9 @@ static void UnconfirmController(ControllerId controller)
 {
     for (int i = 0; i < maxPlayers; i++)
     {
-        if (playerControllers[i].controller == controller && playerControllers[i].status == ConfirmedByPlayer)
+        if (playerControllers[i].controller == controller && playerControllers[i].status == CONFIRMED_BY_PLAYER)
         {
-            playerControllers[i].status = AssignedToPlayer;
-            TextCopy(playerControllers[i].description, TextFormat("Assigned [P%d]", i + 1));
+            playerControllers[i].status = ASSIGNED_TO_PLAYER;
             --numPlayers;
             TraceLog(LOG_INFO, TextFormat("There are now %d players", numPlayers));
         }
@@ -161,13 +166,13 @@ static void CheckKeyboard(KeyboardKey selectKey, KeyboardKey cancelKey, Controll
     {
         switch (GetControllerStatus(controller))
         {
-        case Unassigned:
+        case UNASSIGNED:
             AssignController(controller);
             break;
-        case AssignedToPlayer:
+        case ASSIGNED_TO_PLAYER:
             ConfirmController(controller);
             break;
-        case ConfirmedByPlayer:
+        case CONFIRMED_BY_PLAYER:
             startRequested = true;
             break;
         default:
@@ -178,13 +183,13 @@ static void CheckKeyboard(KeyboardKey selectKey, KeyboardKey cancelKey, Controll
     {
         switch (GetControllerStatus(controller))
         {
-        case Unassigned:
+        case UNASSIGNED:
             cancellationRequested = true;
             break;
-        case ConfirmedByPlayer:
+        case CONFIRMED_BY_PLAYER:
             UnconfirmController(controller);
             break;
-        case AssignedToPlayer:
+        case ASSIGNED_TO_PLAYER:
             UnassignController(controller);
             break;
         default:
@@ -202,13 +207,13 @@ static void CheckGamepad(GamepadNumber gamepad, ControllerId controller)
         {
             switch (GetControllerStatus(controller))
             {
-            case Unassigned:
+            case UNASSIGNED:
                 AssignController(controller);
                 break;
-            case AssignedToPlayer:
+            case ASSIGNED_TO_PLAYER:
                 ConfirmController(controller);
                 break;
-            case ConfirmedByPlayer:
+            case CONFIRMED_BY_PLAYER:
                 startRequested = true;
                 break;
             default:
@@ -219,13 +224,13 @@ static void CheckGamepad(GamepadNumber gamepad, ControllerId controller)
         {
             switch (GetControllerStatus(controller))
             {
-            case Unassigned:
+            case UNASSIGNED:
                 cancellationRequested = true;
                 break;
-            case ConfirmedByPlayer:
+            case CONFIRMED_BY_PLAYER:
                 UnconfirmController(controller);
                 break;
-            case AssignedToPlayer:
+            case ASSIGNED_TO_PLAYER:
                 UnassignController(controller);
                 break;
             default:
@@ -239,22 +244,18 @@ static void CheckGamepad(GamepadNumber gamepad, ControllerId controller)
 static void UpdateAvailableControllers(void)
 {
     numControllers = 0;
-    controllers[numControllers].controller = CONTROLLER_KEYBOARD1;
-    controllers[numControllers].description = "Left Keyboard";
-    controllers[numControllers].cancelDescription = "[W]";
-    controllers[numControllers].unassignedDescription = "[S] Select";
-    controllers[numControllers].assignedDescription = "[S] Confirm";
-    controllers[numControllers].confirmedDescription = "[S] Start\nPlayers = %d";
-    ++numControllers;
 
-    controllers[numControllers].controller = CONTROLLER_KEYBOARD2;
-    controllers[numControllers].description = "Right Keyboard";
-    controllers[numControllers].cancelDescription = "[Up]";
-    controllers[numControllers].unassignedDescription = "[Down] Select";
-    controllers[numControllers].assignedDescription = "[Down] Confirm";
-    controllers[numControllers].confirmedDescription = "[Down] Start\nPlayers = %d";
-    ++numControllers;
+    // On desktop, the keyboard is always available.
+    for (int i = 0; i < MAX_KEYBOARDS; i++)
+    {
+        controllers[numControllers].controller = keyboardDescriptors[i].controllerId;
+        controllers[numControllers].description = keyboardDescriptors[i].description;
+        controllers[numControllers].cancelDescription = keyboardDescriptors[i].cancelDescription;
+        controllers[numControllers].selectDescription = keyboardDescriptors[i].selectDescription;
+        ++numControllers;
+    }
 
+    // Check gamepad availability.
     for (int i = 0; i < MAX_GAMEPADS; i++)
     {
         if (IsGamepadAvailable(gamepadDescriptors[i].gamepadNumber))
@@ -262,9 +263,7 @@ static void UpdateAvailableControllers(void)
             controllers[numControllers].controller = gamepadDescriptors[i].controllerId;
             controllers[numControllers].description = gamepadDescriptors[i].description;
             controllers[numControllers].cancelDescription = gamepadDescriptors[i].cancelDescription;
-            controllers[numControllers].unassignedDescription = gamepadDescriptors[i].unassignedDescription;
-            controllers[numControllers].assignedDescription = gamepadDescriptors[i].assignedDescription;
-            controllers[numControllers].confirmedDescription = gamepadDescriptors[i].confirmedDescription;
+            controllers[numControllers].selectDescription = gamepadDescriptors[i].selectDescription;
             ++numControllers;
         }
         else
@@ -284,6 +283,8 @@ void InitControls(void)
 
     numPlayers = 0;
     numControllers = 2;
+    numAssigned = 0;
+    numConfirmed = 0;
     numActive = 0;
     maxPlayers = MAX_PLAYERS;
     cancellationRequested = false;
@@ -293,8 +294,7 @@ void InitControls(void)
     for (int i = 0; i < MAX_PLAYERS; i++)
     {
         playerControllers[i].controller = CONTROLLER_UNASSIGNED;
-        playerControllers[i].status = Unassigned;
-        playerControllers[i].description[0] = '\0';
+        playerControllers[i].status = UNASSIGNED;
     }
 }
 
@@ -354,20 +354,15 @@ void UpdateControls(void)
     }
 
     // Check if we can start the game.
-    int numConfirmed = 0;
-    int numUnassigned = 0;
-    int numAssigned = 0;
+    numConfirmed = 0;
+    numAssigned = 0;
     for (int i = 0; i < maxPlayers; i++)
     {
-        if (playerControllers[i].controller == CONTROLLER_UNASSIGNED)
-        {
-            ++numUnassigned;
-        }
-        else if (playerControllers[i].status == ConfirmedByPlayer)
+        if (playerControllers[i].status == CONFIRMED_BY_PLAYER)
         {
             ++numConfirmed;
         }
-        else if (playerControllers[i].status == AssignedToPlayer)
+        else if (playerControllers[i].status == ASSIGNED_TO_PLAYER)
         {
             ++numAssigned;
         }
@@ -424,7 +419,7 @@ void DrawControls(double alpha)
     for (int i = 0; i < numControllers; i++)
     {
         // Get the controller's status.
-        AssignmentStatus status = Unassigned;
+        AssignmentStatus status = UNASSIGNED;
         for (int j = 0; j < MAX_PLAYERS; j++)
         {
             if (playerControllers[j].controller == controllers[i].controller)
@@ -433,15 +428,16 @@ void DrawControls(double alpha)
             }
         }
 
-        // Unassigned controllers are disabled if the number of controllers active matches the maximum number of players.
-        const bool isEnabled = status != Unassigned || numActive < maxPlayers;
+        // Unassigned controllers are disabled if the number of active controllers matches the maximum number of players.
+        const bool isEnabled = status != UNASSIGNED || numActive < maxPlayers;
 
         // Describe the controller.
         DrawTextRec(scoreFont, TextFormat("%-15s", controllers[i].description),
                     (Rectangle){i * width + margin, (float)screenHeight / 2.0f, controlWidth, (float)screenHeight / 8.0f}, 32, 2,
                     false, isEnabled ? RAYWHITE : GRAY);
 
-        if (status == Unassigned)
+        // Draw return to menu / back.
+        if (status == UNASSIGNED)
         {
             DrawTextRec(scoreFont, TextFormat("%s Return to menu", controllers[i].cancelDescription),
                         (Rectangle){i * width + margin, screenHeight / 2.0f - 20.0f, controlWidth, screenHeight / 8.0f}, 16, 2,
@@ -454,22 +450,23 @@ void DrawControls(double alpha)
                         false, isEnabled ? ORANGE : GRAY);
         }
 
+        // Draw select.
         switch (status)
         {
-        case Unassigned:
-            DrawTextRec(scoreFont, controllers[i].unassignedDescription,
+        case UNASSIGNED:
+            DrawTextRec(scoreFont, TextFormat("%s Select", controllers[i].selectDescription),
                         (Rectangle){i * width + margin, 40.0f + screenHeight / 2.0f, controlWidth, screenHeight / 8.0f}, 32, 2,
-                        false, isEnabled ? GREEN : GRAY);
+                        false, isEnabled ? LIME : GRAY);
             break;
-        case AssignedToPlayer:
-            DrawTextRec(scoreFont, controllers[i].assignedDescription,
+        case ASSIGNED_TO_PLAYER:
+            DrawTextRec(scoreFont, TextFormat("%s Confirm", controllers[i].selectDescription),
                         (Rectangle){i * width + margin, 40.0f + screenHeight / 2.0f, controlWidth, screenHeight / 8.0f}, 32, 2,
-                        false, isEnabled ? GREEN : GRAY);
+                        false, isEnabled ? LIME : GRAY);
             break;
-        case ConfirmedByPlayer:
-            DrawTextRec(scoreFont, TextFormat(controllers[i].confirmedDescription, numPlayers),
+        case CONFIRMED_BY_PLAYER:
+            DrawTextRec(scoreFont, TextFormat("%s Start\nPlayers %d", controllers[i].selectDescription, numPlayers),
                         (Rectangle){i * width + margin, 40.0f + screenHeight / 2.0f, controlWidth, screenHeight / 8.0f}, 32, 2,
-                        false, (isEnabled && state == STARTABLE) ? GREEN : GRAY);
+                        false, (isEnabled && state == STARTABLE) ? LIME : GRAY);
             break;
         default:
             break;
@@ -481,6 +478,12 @@ void DrawControls(double alpha)
         Vector2 size = MeasureTextEx(scoreFont, TextFormat("Start %d player game", numPlayers), 32, 2);
         Vector2 position = (Vector2){((float)screenWidth - size.x) / 2, 7 * (float)screenHeight / 8};
         DrawTextEx(scoreFont, TextFormat("Start %d player game", numPlayers), position, 32, 2, LIME);
+    }
+    else if (numConfirmed > 0)
+    {
+        Vector2 size = MeasureTextEx(scoreFont, TextFormat("Waiting for %d player(s)", numAssigned), 32, 2);
+        Vector2 position = (Vector2){((float)screenWidth - size.x) / 2, 7 * (float)screenHeight / 8};
+        DrawTextEx(scoreFont, TextFormat("Waiting for %d player(s)", numAssigned), position, 32, 2, ORANGE);
     }
 
     EndDrawing();
