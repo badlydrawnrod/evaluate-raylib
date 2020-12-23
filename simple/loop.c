@@ -9,6 +9,8 @@
 #define SLOW_FPS 60
 #define FAST_FPS 240
 
+#define MAX_DELTA 0.1f
+
 #define UPDATE_FPS 50
 
 #define SCREEN_WIDTH 1280
@@ -37,7 +39,6 @@ const float width = SCREEN_WIDTH / 16.0f;
 const float height = SCREEN_HEIGHT / 16.0f;
 const float speed = 4.0f;
 const float rotation = 2.0f;
-const double maxDelta = 0.25;
 
 float fixedX = 0.0f;
 float fixedY = SCREEN_HEIGHT / 5.0f;
@@ -52,7 +53,7 @@ float drawX = 0.0f;
 float drawY = 4 * SCREEN_HEIGHT / 5.0f;
 float drawAngle = 0.0f;
 
-void FixedUpdate()
+void FixedUpdate(void)
 {
     fixedX += speed;
     if (fixedX >= SCREEN_WIDTH)
@@ -72,7 +73,7 @@ void Update(double elapsed)
     updateAngle += rotation * UPDATE_FPS * elapsed;
 }
 
-void CheckTriggers()
+void CheckTriggers(void)
 {
     if (IsKeyPressed(KEY_F11))
     {
@@ -134,11 +135,16 @@ void Draw(double alpha)
     EndDrawing();
 }
 
-void UpdateDrawFrame()
+void UpdateDrawFrame(void)
 {
+#if defined(__EMSCRIPTEN__)
+    // For web builds we only need to check for edge-triggered events once per frame.
+    CheckTriggers();
+#endif
+
     // See https://gafferongames.com/post/fix_your_timestep/ for more details on how this works.
     double now = GetTime();
-    double delta = fmin(now - timing.lastTime, maxDelta);
+    double delta = fmin(now - timing.lastTime, MAX_DELTA);
 
     // Fixed timestep updates.
     timing.lastTime = now;
@@ -148,9 +154,6 @@ void UpdateDrawFrame()
         FixedUpdate();
         timing.t += timing.updateInterval;
         timing.accumulator -= timing.updateInterval;
-#if defined(EMSCRIPTEN)
-        CheckTriggers();
-#endif
     }
     timing.alpha = timing.accumulator / timing.updateInterval;
 
@@ -160,19 +163,21 @@ void UpdateDrawFrame()
     if (drawInterval >= timing.renderInterval)
     {
         // Per-frame update.
-        Update(fmin(drawInterval, maxDelta));
+        Update(fmin(drawInterval, MAX_DELTA));
 
         // Draw the frame.
         Draw(timing.alpha);
         timing.lastDrawTime = now;
-#if !defined(EMSCRIPTEN)
-        CheckTriggers(); // As raylib updates input events in EndDrawing(), we update here so as to not miss
-                         // anything edge triggered such as a keypress when we have a high frame rate.
+
+#if !defined(__EMSCRIPTEN__)
+        // Raylib updates its input events in EndDrawing(), so we check for edge-triggered input events such as key-presses here so
+        // that we don't miss them when we have a high frame rate.
+        CheckTriggers();
 #endif
     }
 }
 
-int main()
+int main(void)
 {
     SetConfigFlags(FLAG_MSAA_4X_HINT);
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Loop");
