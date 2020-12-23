@@ -122,7 +122,6 @@ static void UnassignController(ControllerId controller)
             if (playerControllers[i].status == CONFIRMED_BY_PLAYER)
             {
                 --numPlayers;
-                TraceLog(LOG_INFO, TextFormat("There are now %d players", numPlayers));
             }
             playerControllers[i].controller = CONTROLLER_UNASSIGNED;
             playerControllers[i].status = UNASSIGNED;
@@ -140,7 +139,6 @@ static void ConfirmController(ControllerId controller)
         {
             playerControllers[i].status = CONFIRMED_BY_PLAYER;
             ++numPlayers;
-            TraceLog(LOG_INFO, TextFormat("There are now %d players", numPlayers));
         }
     }
 }
@@ -154,7 +152,6 @@ static void UnconfirmController(ControllerId controller)
         {
             playerControllers[i].status = ASSIGNED_TO_PLAYER;
             --numPlayers;
-            TraceLog(LOG_INFO, TextFormat("There are now %d players", numPlayers));
         }
     }
 }
@@ -336,22 +333,10 @@ int GetNumberOfPlayers(void)
 
 void UpdateControls(void)
 {
-    int oldNumControllers = numControllers;
-    int oldMaxPlayers = maxPlayers;
-
     UpdateAvailableControllers();
 
     // We can't have more players than controllers.
     maxPlayers = MinInt(MAX_PLAYERS, numControllers);
-
-    if (numControllers != oldNumControllers)
-    {
-        TraceLog(LOG_INFO, TextFormat("Number of controllers changed from %d to %d", oldNumControllers, numControllers));
-    }
-    if (maxPlayers != oldMaxPlayers)
-    {
-        TraceLog(LOG_INFO, TextFormat("Max players changed from %d to %d", oldMaxPlayers, maxPlayers));
-    }
 
     // Check if we can start the game.
     numConfirmed = 0;
@@ -385,7 +370,6 @@ void UpdateControls(void)
         if (canStart)
         {
             state = STARTING;
-            TraceLog(LOG_INFO, TextFormat("Starting game with %d players", numPlayers));
         }
     }
 
@@ -396,7 +380,6 @@ void UpdateControls(void)
         if (canCancel)
         {
             state = CANCELLED;
-            TraceLog(LOG_INFO, "Cancelling");
         }
     }
 }
