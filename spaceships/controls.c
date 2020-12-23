@@ -123,8 +123,16 @@ static void UnassignController(ControllerId controller)
             {
                 --numPlayers;
             }
-            playerControllers[i].controller = CONTROLLER_UNASSIGNED;
-            playerControllers[i].status = UNASSIGNED;
+
+            // Move the controllers that follow this one down by a slot so that controllers always appear in order of assignment.
+            for (int j = i + 1; j < maxPlayers; j++)
+            {
+                playerControllers[j - 1] = playerControllers[j];
+            }
+
+            // Unassign the final controller.
+            playerControllers[maxPlayers - 1].controller = CONTROLLER_UNASSIGNED;
+            playerControllers[maxPlayers - 1].status = UNASSIGNED;
             return;
         }
     }
