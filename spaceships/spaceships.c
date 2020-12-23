@@ -29,7 +29,8 @@ typedef enum
     NONE,
     MENU,
     CONTROLLER_SELECTION,
-    PLAYING
+    PLAYING,
+    QUIT
 } Screen;
 
 static struct
@@ -81,6 +82,11 @@ static void FixedUpdate(void)
             FinishMenuScreen();
             currentScreen = CONTROLLER_SELECTION;
             InitControlsScreen();
+        }
+        else if (IsCancelledMenuScreen())
+        {
+            FinishMenuScreen();
+            currentScreen = QUIT;
         }
         break;
     case CONTROLLER_SELECTION:
@@ -212,24 +218,8 @@ static void UpdateDrawFrame(void)
     }
 }
 
-int main(void)
+static void Unload(void)
 {
-    SetConfigFlags(FLAG_MSAA_4X_HINT);
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Spaceships");
-    SetTargetFPS(renderFps);
-
-    InitTiming();
-    InitScreens();
-
-#if defined(PLATFORM_WEB) || defined(EMSCRIPTEN)
-    emscripten_set_main_loop(UpdateDrawFrame, 0, 1);
-#else
-    while (!WindowShouldClose())
-    {
-        UpdateDrawFrame();
-    }
-#endif
-
     // Workaround until I make a decision on resource management.
     switch (currentScreen)
     {
@@ -244,7 +234,28 @@ int main(void)
     default:
         break;
     }
+}
 
+int main(void)
+{
+    SetConfigFlags(FLAG_MSAA_4X_HINT);
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Spaceships");
+    SetTargetFPS(renderFps);
+    SetExitKey(0);
+
+    InitTiming();
+    InitScreens();
+
+#if defined(PLATFORM_WEB) || defined(EMSCRIPTEN)
+    emscripten_set_main_loop(UpdateDrawFrame, 0, 1);
+#else
+    while (currentScreen != QUIT && !WindowShouldClose())
+    {
+        UpdateDrawFrame();
+    }
+#endif
+
+    Unload();
     CloseWindow();
 
     return 0;

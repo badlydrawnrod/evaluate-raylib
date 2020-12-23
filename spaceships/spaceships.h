@@ -24,6 +24,7 @@ void UpdateMenuScreen(void);                                    // Update the me
 void DrawMenuScreen(double alpha);                              // Draw the menu screen.
 void CheckTriggersMenuScreen(void);                             // Allow the menu screen to handle edge-triggered events.
 bool IsStartedMenuScreen(void);                                 // Check if the menu is ready for the game to start.
+bool IsCancelledMenuScreen(void);                               // Check if the menu is ready for the program to end.
 
 // Controls selection screen.
 void InitControlsScreen(void);                                  // Initialise the controls screen.

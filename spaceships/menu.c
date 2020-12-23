@@ -4,23 +4,32 @@
 typedef enum
 {
     SHOWING_MENU,
-    STARTING
+    STARTING,
+    CANCELLED
 } MenuState;
 
 static int screenWidth;
 static int screenHeight;
 
 static bool startRequested;
+static bool quitRequested;
 static MenuState state;
 
-static void CheckKeyboard(KeyboardKey key)
+static void CheckKeyboard(KeyboardKey selectKey, KeyboardKey cancelKey)
 {
-    startRequested = startRequested || IsKeyReleased(key);
+    startRequested = startRequested || IsKeyReleased(selectKey);
+    quitRequested = quitRequested || IsKeyReleased(cancelKey);
 }
 
-static void CheckGamepad(GamepadNumber gamepad, GamepadButton button)
+static void CheckGamepad(GamepadNumber gamepad, GamepadButton selectButton, GamepadButton cancelButton)
 {
-    startRequested = startRequested || (IsGamepadAvailable(gamepad) && IsGamepadButtonReleased(gamepad, button));
+    if (!IsGamepadAvailable(gamepad))
+    {
+        return;
+    }
+
+    startRequested = startRequested || IsGamepadButtonReleased(gamepad, selectButton);
+    quitRequested = quitRequested || IsGamepadButtonReleased(gamepad, cancelButton);
 }
 
 void InitMenuScreen(void)
@@ -30,6 +39,7 @@ void InitMenuScreen(void)
 
     state = SHOWING_MENU;
     startRequested = false;
+    quitRequested = false;
 }
 
 void FinishMenuScreen(void)
@@ -40,7 +50,14 @@ void UpdateMenuScreen(void)
 {
     if (startRequested)
     {
+        startRequested = false;
         state = STARTING;
+    }
+
+    if (quitRequested)
+    {
+        quitRequested = false;
+        state = CANCELLED;
     }
 }
 
@@ -57,15 +74,20 @@ void DrawMenuScreen(double alpha)
 
 void CheckTriggersMenuScreen(void)
 {
-    CheckKeyboard(KEY_SPACE);
-    CheckKeyboard(KEY_ENTER);
-    CheckGamepad(GAMEPAD_PLAYER1, GAMEPAD_BUTTON_RIGHT_FACE_DOWN);
-    CheckGamepad(GAMEPAD_PLAYER2, GAMEPAD_BUTTON_RIGHT_FACE_DOWN);
-    CheckGamepad(GAMEPAD_PLAYER3, GAMEPAD_BUTTON_RIGHT_FACE_DOWN);
-    CheckGamepad(GAMEPAD_PLAYER4, GAMEPAD_BUTTON_RIGHT_FACE_DOWN);
+    CheckKeyboard(KEY_SPACE, KEY_ESCAPE);
+    CheckKeyboard(KEY_ENTER, KEY_ESCAPE);
+    CheckGamepad(GAMEPAD_PLAYER1, GAMEPAD_BUTTON_RIGHT_FACE_DOWN, GAMEPAD_BUTTON_MIDDLE_RIGHT);
+    CheckGamepad(GAMEPAD_PLAYER2, GAMEPAD_BUTTON_RIGHT_FACE_DOWN, GAMEPAD_BUTTON_MIDDLE_RIGHT);
+    CheckGamepad(GAMEPAD_PLAYER3, GAMEPAD_BUTTON_RIGHT_FACE_DOWN, GAMEPAD_BUTTON_MIDDLE_RIGHT);
+    CheckGamepad(GAMEPAD_PLAYER4, GAMEPAD_BUTTON_RIGHT_FACE_DOWN, GAMEPAD_BUTTON_MIDDLE_RIGHT);
 }
 
 bool IsStartedMenuScreen(void)
 {
     return state == STARTING;
+}
+
+bool IsCancelledMenuScreen(void)
+{
+    return state == CANCELLED;
 }
