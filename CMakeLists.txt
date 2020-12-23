@@ -11,10 +11,10 @@ if (NOT raylib_FOUND)
 
     FetchContent_Declare(
             raylib
-            #            URL https://github.com/raysan5/raylib/archive/master.tar.gz
-            If master is broken for some reason then uncomment this.
-            GIT_REPOSITORY ${CMAKE_SOURCE_DIR}/../3rdparty/raylib
-            GIT_TAG rod2
+            URL https://github.com/raysan5/raylib/archive/master.tar.gz
+            #            If master is broken for some reason then uncomment this.
+            #            GIT_REPOSITORY ${CMAKE_SOURCE_DIR}/../3rdparty/raylib
+            #            GIT_TAG rod2
     )
     FetchContent_GetProperties(raylib)
 

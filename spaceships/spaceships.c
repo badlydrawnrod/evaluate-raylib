@@ -21,9 +21,9 @@
 int renderFps = FAST_FPS;
 
 #if defined(EMSCRIPTEN)
-#define CAP_FRAME_RATE false
+#define CAP_FRAME_RATE 0
 #else
-#define CAP_FRAME_RATE true
+#define CAP_FRAME_RATE 1
 #endif
 
 typedef enum
@@ -56,7 +56,11 @@ void InitTiming(void)
 {
     timing.t = 0.0;
     timing.updateInterval = 1.0 / UPDATE_FPS;
-    timing.renderInterval = CAP_FRAME_RATE ? 1.0 / renderFps : 0.0;
+#if defined(CAP_FRAME_RATE)
+    timing.renderInterval = 1.0 / renderFps;
+#else
+    timing.renderInterval = 0.0;
+#endif
     timing.accumulator = 0.0;
     timing.alpha = 0.0;
     timing.lastTime = GetTime();
@@ -69,22 +73,22 @@ void FixedUpdate(void)
     {
     case NONE:
         currentScreen = MENU;
-        InitMenu();
+        InitMenuScreen();
         break;
     case MENU:
-        UpdateMenu();
-        if (IsStartingMenu())
+        UpdateMenuScreen();
+        if (IsStartedMenuScreen())
         {
-            FinishMenu();
+            FinishMenuScreen();
             currentScreen = CONTROLLER_SELECTION;
-            InitControls();
+            InitControlsScreen();
         }
         break;
     case CONTROLLER_SELECTION:
-        UpdateControls();
-        if (IsStartedControls())
+        UpdateControlsScreen();
+        if (IsStartedControlsScreen())
         {
-            FinishControls();
+            FinishControlsScreen();
             currentScreen = PLAYING;
             ControllerId controllers[4];
             int numPlayers = GetNumberOfPlayers();
@@ -92,22 +96,22 @@ void FixedUpdate(void)
             {
                 controllers[i] = GetControllerAssignment(i);
             }
-            InitPlaying(numPlayers, controllers);
+            InitPlayingScreen(numPlayers, controllers);
         }
-        else if (IsCancelledControls())
+        else if (IsCancelledControlsScreen())
         {
-            FinishControls();
+            FinishControlsScreen();
             currentScreen = MENU;
-            InitMenu();
+            InitMenuScreen();
         }
         break;
     case PLAYING:
-        UpdatePlaying();
-        if (IsCancelledPlaying())
+        UpdatePlayingScreen();
+        if (IsCancelledPlayingScreen())
         {
-            FinishPlaying();
+            FinishPlayingScreen();
             currentScreen = MENU;
-            InitMenu();
+            InitMenuScreen();
         }
         break;
     default:
@@ -136,13 +140,13 @@ void CheckTriggers(void)
     switch (currentScreen)
     {
     case MENU:
-        CheckTriggersMenu();
+        CheckTriggersMenuScreen();
         break;
     case CONTROLLER_SELECTION:
-        CheckTriggersControls();
+        CheckTriggersControlsScreen();
         break;
     case PLAYING:
-        CheckTriggersPlaying();
+        CheckTriggersPlayingScreen();
         break;
     default:
         break;
@@ -154,13 +158,13 @@ void Draw(double alpha)
     switch (currentScreen)
     {
     case MENU:
-        DrawMenu(alpha);
+        DrawMenuScreen(alpha);
         break;
     case CONTROLLER_SELECTION:
-        DrawControls(alpha);
+        DrawControlsScreen(alpha);
         break;
     case PLAYING:
-        DrawPlaying(alpha);
+        DrawPlayingScreen(alpha);
         break;
     default:
         break;
@@ -169,6 +173,11 @@ void Draw(double alpha)
 
 void UpdateDrawFrame(void)
 {
+#if defined(__EMSCRIPTEN__)
+    // For web builds we only need to check for edge-triggered events once per frame.
+    CheckTriggers();
+#endif
+
     // See https://gafferongames.com/post/fix_your_timestep/ for more details on how this works.
     double now = GetTime();
     double delta = fmin(now - timing.lastTime, MAX_DELTA);
@@ -181,9 +190,6 @@ void UpdateDrawFrame(void)
         FixedUpdate();
         timing.t += timing.updateInterval;
         timing.accumulator -= timing.updateInterval;
-#if defined(EMSCRIPTEN)
-        CheckTriggers();
-#endif
     }
     timing.alpha = timing.accumulator / timing.updateInterval;
 
@@ -198,9 +204,11 @@ void UpdateDrawFrame(void)
         // Draw the frame.
         Draw(timing.alpha);
         timing.lastDrawTime = now;
-#if !defined(EMSCRIPTEN)
-        CheckTriggers(); // As raylib updates input events in EndDrawing(), we update here so as to not miss
-                         // anything edge triggered such as a keypress when we have a high frame rate.
+
+#if !defined(__EMSCRIPTEN__)
+        // Raylib updates its input events in EndDrawing(), so we check for edge-triggered input events such as key-presses here so
+        // that we don't miss them when we have a high frame rate.
+        CheckTriggers();
 #endif
     }
 }
@@ -227,13 +235,13 @@ int main(void)
     switch (currentScreen)
     {
     case MENU:
-        FinishMenu();
+        FinishMenuScreen();
         break;
     case CONTROLLER_SELECTION:
-        FinishControls();
+        FinishControlsScreen();
         break;
     case PLAYING:
-        FinishPlaying();
+        FinishPlayingScreen();
     default:
         break;
     }

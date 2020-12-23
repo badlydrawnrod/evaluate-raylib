@@ -360,6 +360,17 @@ jwE50AGjLCVuS8Yt4H7OgZLKK5EKOsLviEWJSL/+0uMi7gLUSBseYwqEbXvSHCec1CJvZPyHCmYQffaB
     else audioBtn.value = "🔈 RESUME";
   }
 </script>
+
+<script>
+  window.addEventListener("keydown", function (e) {
+    // Prevent the spacebar and arrow keys from doing annoying things such as scrolling.
+    if ([" ", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].indexOf(e.key) > -1) {
+      e.preventDefault();
+    } else if ([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
+      e.preventDefault();
+    }
+  }, false);
+</script>
 {{{ SCRIPT }}}
 </body>
 </html>

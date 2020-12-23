@@ -15,29 +15,33 @@ typedef enum ControllerId
     CONTROLLER_GAMEPAD4
 } ControllerId;
 
+// clang-format off
+
 // Menu screen.
-void InitMenu(void);          // Initialise the menu screen.
-void FinishMenu(void);        // Tear down the menu screen.
-bool IsStartingMenu(void);    // Check if the menu is ready for the game to start.
-void DrawMenu(double alpha);  // Draw the menu screen.
-void UpdateMenu(void);        // Update the menu screen.
-void CheckTriggersMenu(void); // Allow the menu screen to handle edge-triggered events.
+void InitMenuScreen(void);                                      // Initialise the menu screen.
+void FinishMenuScreen(void);                                    // Tear down the menu screen.
+void UpdateMenuScreen(void);                                    // Update the menu screen.
+void DrawMenuScreen(double alpha);                              // Draw the menu screen.
+void CheckTriggersMenuScreen(void);                             // Allow the menu screen to handle edge-triggered events.
+bool IsStartedMenuScreen(void);                                 // Check if the menu is ready for the game to start.
 
 // Controls selection screen.
-void InitControls(void);                          // Initialise the controls screen.
-void FinishControls(void);                        // Tear down the controls screen.
-bool IsCancelledControls(void);                   // Check if the controls screen is cancelled.
-bool IsStartedControls(void);                     // Check if the controls screen is ready for the game to start.
-void DrawControls(double alpha);                  // Draw the controls screen.
-void UpdateControls(void);                        // Update the controls screen.
-void CheckTriggersControls(void);                 // Allow the controls screen to handle edge-triggered events.
-ControllerId GetControllerAssignment(int player); // Get the controller assigned to the given player.
-int GetNumberOfPlayers(void);                     // Get the number of players.
+void InitControlsScreen(void);                                  // Initialise the controls screen.
+void FinishControlsScreen(void);                                // Tear down the controls screen.
+void UpdateControlsScreen(void);                                // Update the controls screen.
+void DrawControlsScreen(double alpha);                          // Draw the controls screen.
+void CheckTriggersControlsScreen(void);                         // Allow the controls screen to handle edge-triggered events.
+bool IsCancelledControlsScreen(void);                           // Check if the controls screen is cancelled.
+bool IsStartedControlsScreen(void);                             // Check if the controls screen is ready for the game to start.
+ControllerId GetControllerAssignment(int player);               // Get the controller assigned to the given player.
+int GetNumberOfPlayers(void);                                   // Get the number of players.
 
 // Playing screen.
-void InitPlaying(int players, const ControllerId* controllers); // Initialise the playing screen.
-void FinishPlaying(void);                                       // Tear down the playing screen.
-bool IsCancelledPlaying(void);                                  // Check if the playing screen is cancelled.
-void DrawPlaying(double alpha);                                 // Draw the playing screen.
-void UpdatePlaying(void);                                       // Update the playing screen.
-void CheckTriggersPlaying(void);                                // Allow the playing screen to handle edge-triggered events.
+void InitPlayingScreen(int players, const ControllerId* controllers); // Initialise the playing screen.
+void FinishPlayingScreen(void);                                 // Tear down the playing screen.
+void UpdatePlayingScreen(void);                                 // Update the playing screen.
+void DrawPlayingScreen(double alpha);                           // Draw the playing screen.
+void CheckTriggersPlayingScreen(void);                          // Allow the playing screen to handle edge-triggered events.
+bool IsCancelledPlayingScreen(void);                            // Check if the playing screen is cancelled.
+
+// clang-format on

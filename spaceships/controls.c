@@ -270,7 +270,7 @@ static void UpdateAvailableControllers(void)
     }
 }
 
-void InitControls(void)
+void InitControlsScreen(void)
 {
     scoreFont = LoadFont("assets/terminal/Mecha.ttf");
     screenWidth = GetScreenWidth();
@@ -295,43 +295,12 @@ void InitControls(void)
     }
 }
 
-void FinishControls(void)
+void FinishControlsScreen(void)
 {
     UnloadFont(scoreFont);
 }
 
-bool IsCancelledControls(void)
-{
-    return state == CANCELLED;
-}
-
-bool IsStartedControls(void)
-{
-    return state == STARTING;
-}
-
-void CheckTriggersControls(void)
-{
-    // Check player selections.
-    CheckKeyboard(KEY_S, KEY_W, CONTROLLER_KEYBOARD1);
-    CheckKeyboard(KEY_DOWN, KEY_UP, CONTROLLER_KEYBOARD2);
-    CheckGamepad(GAMEPAD_PLAYER1, CONTROLLER_GAMEPAD1);
-    CheckGamepad(GAMEPAD_PLAYER2, CONTROLLER_GAMEPAD2);
-    CheckGamepad(GAMEPAD_PLAYER3, CONTROLLER_GAMEPAD3);
-    CheckGamepad(GAMEPAD_PLAYER4, CONTROLLER_GAMEPAD4);
-}
-
-ControllerId GetControllerAssignment(int player)
-{
-    return playerControllers[player].controller;
-}
-
-int GetNumberOfPlayers(void)
-{
-    return numPlayers;
-}
-
-void UpdateControls(void)
+void UpdateControlsScreen(void)
 {
     UpdateAvailableControllers();
 
@@ -384,7 +353,7 @@ void UpdateControls(void)
     }
 }
 
-void DrawControls(double alpha)
+void DrawControlsScreen(double alpha)
 {
     (void)alpha;
     ClearBackground(BLACK);
@@ -470,4 +439,35 @@ void DrawControls(double alpha)
     }
 
     EndDrawing();
+}
+
+void CheckTriggersControlsScreen(void)
+{
+    // Check player selections.
+    CheckKeyboard(KEY_S, KEY_W, CONTROLLER_KEYBOARD1);
+    CheckKeyboard(KEY_DOWN, KEY_UP, CONTROLLER_KEYBOARD2);
+    CheckGamepad(GAMEPAD_PLAYER1, CONTROLLER_GAMEPAD1);
+    CheckGamepad(GAMEPAD_PLAYER2, CONTROLLER_GAMEPAD2);
+    CheckGamepad(GAMEPAD_PLAYER3, CONTROLLER_GAMEPAD3);
+    CheckGamepad(GAMEPAD_PLAYER4, CONTROLLER_GAMEPAD4);
+}
+
+bool IsCancelledControlsScreen(void)
+{
+    return state == CANCELLED;
+}
+
+bool IsStartedControlsScreen(void)
+{
+    return state == STARTING;
+}
+
+ControllerId GetControllerAssignment(int player)
+{
+    return playerControllers[player].controller;
+}
+
+int GetNumberOfPlayers(void)
+{
+    return numPlayers;
 }

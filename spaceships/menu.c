@@ -23,7 +23,7 @@ static void CheckGamepad(GamepadNumber gamepad, GamepadButton button)
     startRequested = startRequested || (IsGamepadAvailable(gamepad) && IsGamepadButtonReleased(gamepad, button));
 }
 
-void InitMenu(void)
+void InitMenuScreen(void)
 {
     screenWidth = GetScreenWidth();
     screenHeight = GetScreenHeight();
@@ -32,16 +32,19 @@ void InitMenu(void)
     startRequested = false;
 }
 
-void FinishMenu(void)
+void FinishMenuScreen(void)
 {
 }
 
-bool IsStartingMenu(void)
+void UpdateMenuScreen(void)
 {
-    return state == STARTING;
+    if (startRequested)
+    {
+        state = STARTING;
+    }
 }
 
-void DrawMenu(double alpha)
+void DrawMenuScreen(double alpha)
 {
     (void)alpha;
     ClearBackground(BLACK);
@@ -52,15 +55,7 @@ void DrawMenu(double alpha)
     EndDrawing();
 }
 
-void UpdateMenu(void)
-{
-    if (startRequested)
-    {
-        state = STARTING;
-    }
-}
-
-void CheckTriggersMenu(void)
+void CheckTriggersMenuScreen(void)
 {
     CheckKeyboard(KEY_SPACE);
     CheckKeyboard(KEY_ENTER);
@@ -68,4 +63,9 @@ void CheckTriggersMenu(void)
     CheckGamepad(GAMEPAD_PLAYER2, GAMEPAD_BUTTON_RIGHT_FACE_DOWN);
     CheckGamepad(GAMEPAD_PLAYER3, GAMEPAD_BUTTON_RIGHT_FACE_DOWN);
     CheckGamepad(GAMEPAD_PLAYER4, GAMEPAD_BUTTON_RIGHT_FACE_DOWN);
+}
+
+bool IsStartedMenuScreen(void)
+{
+    return state == STARTING;
 }

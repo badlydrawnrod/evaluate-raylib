@@ -340,7 +340,7 @@ static void CheckGamepad(GamepadNumber gamepad, GamepadButton selectButton, Game
     resumeRequested = resumeRequested || IsGamepadButtonReleased(gamepad, cancelButton);
 }
 
-void InitPlaying(int players, const ControllerId* controllers)
+void InitPlayingScreen(int players, const ControllerId* controllers)
 {
     screenWidth = GetScreenWidth();
     screenHeight = GetScreenHeight();
@@ -378,57 +378,11 @@ void InitPlaying(int players, const ControllerId* controllers)
     }
 }
 
-void FinishPlaying(void)
+void FinishPlayingScreen(void)
 {
 }
 
-bool IsCancelledPlaying(void)
-{
-    return state == CANCELLED;
-}
-
-void DrawPlaying(double alpha)
-{
-    BeginDrawing();
-    ClearBackground(BLACK);
-    DrawText("PLAYING", 4, 4, 20, RAYWHITE);
-    if (state == PAUSED)
-    {
-        int width = MeasureText(pausedText, 20);
-        DrawText(pausedText, (screenWidth - width) / 2, 7 * screenHeight / 8, 20, RAYWHITE);
-    }
-
-    if (state == PAUSED)
-    {
-        alpha = 0.0;
-    }
-
-    // Draw the ships.
-    for (int i = 0; i < numPlayers; i++)
-    {
-        if (ships[i].alive)
-        {
-            DrawShip(&ships[i], alpha);
-        }
-    }
-
-    // Draw the shots.
-    for (int i = 0; i < numPlayers * SHOTS_PER_PLAYER; i++)
-    {
-        const Shot* shot = &shots[i];
-        if (shot->alive > 0)
-        {
-            Color colour = shipColours[i / SHOTS_PER_PLAYER];
-            DrawShot(shot, colour, alpha);
-        }
-    }
-
-    DrawFPS(screenWidth / 2 - 16, screenHeight - 24);
-
-    EndDrawing();
-}
-
-void UpdatePlaying(void)
+void UpdatePlayingScreen(void)
 {
     // Check for internal state changes.
     if (state == PLAYING)
@@ -489,7 +443,48 @@ void UpdatePlaying(void)
     }
 }
 
-void CheckTriggersPlaying(void)
+void DrawPlayingScreen(double alpha)
+{
+    BeginDrawing();
+    ClearBackground(BLACK);
+    DrawText("PLAYING", 4, 4, 20, RAYWHITE);
+    if (state == PAUSED)
+    {
+        int width = MeasureText(pausedText, 20);
+        DrawText(pausedText, (screenWidth - width) / 2, 7 * screenHeight / 8, 20, RAYWHITE);
+    }
+
+    if (state == PAUSED)
+    {
+        alpha = 0.0;
+    }
+
+    // Draw the ships.
+    for (int i = 0; i < numPlayers; i++)
+    {
+        if (ships[i].alive)
+        {
+            DrawShip(&ships[i], alpha);
+        }
+    }
+
+    // Draw the shots.
+    for (int i = 0; i < numPlayers * SHOTS_PER_PLAYER; i++)
+    {
+        const Shot* shot = &shots[i];
+        if (shot->alive > 0)
+        {
+            Color colour = shipColours[i / SHOTS_PER_PLAYER];
+            DrawShot(shot, colour, alpha);
+        }
+    }
+
+    DrawFPS(screenWidth / 2 - 16, screenHeight - 24);
+
+    EndDrawing();
+}
+
+void CheckTriggersPlayingScreen(void)
 {
     // Check for player(s) choosing to pause / resume / quit.
     CheckKeyboard(KEY_P, KEY_R);
@@ -505,4 +500,9 @@ void CheckTriggersPlaying(void)
             CheckForFire(&ships[i]);
         }
     }
+}
+
+bool IsCancelledPlayingScreen(void)
+{
+    return state == CANCELLED;
 }
