@@ -74,9 +74,9 @@ const Vector2 shotLines[] = {{0, -0.25f}, {0, 0.25f}};
 // Ship appearance.
 const Command shipCommands[][MAX_LINES] = {
         // Ship 0.
-        {{MOVE, {-1, 1}}, {LINE, {0, -1}}, {LINE, {1, 1}}, {LINE, {0, 0.5f}}, {LINE, {-1, 1}}, {END}},
+        {{MOVE, {-1, 1}}, {LINE, {0, -1}}, {LINE, {1, 1}}, {LINE, {0, 0.5f}}, {LINE, {-1, 1}}, {END, {0, 0}}},
         // Ship 1.
-        {{MOVE, {0, -1}}, {LINE, {1, 0.5f}}, {LINE, {0, 1}}, {LINE, {-1, 0.5f}}, {LINE, {0, -1}}, {END}},
+        {{MOVE, {0, -1}}, {LINE, {1, 0.5f}}, {LINE, {0, 1}}, {LINE, {-1, 0.5f}}, {LINE, {0, -1}}, {END, {0, 0}}},
         // Ship 2.
         {{MOVE, {0, -1}},
          {LINE, {0.5f, 0}},
@@ -86,7 +86,7 @@ const Command shipCommands[][MAX_LINES] = {
          {LINE, {-1, 0.3f}},
          {LINE, {-0.5f, 0}},
          {LINE, {0, -1}},
-         {END}},
+         {END, {0, 0}}},
         // Ship 3.
         {{MOVE, {0, -1}},
          {LINE, {0.25f, 0.25f}},
@@ -98,7 +98,7 @@ const Command shipCommands[][MAX_LINES] = {
          {LINE, {-1, 0}},
          {LINE, {-0.25f, 0.25f}},
          {LINE, {0, -1}},
-         {END}}};
+         {END, {0, 0}}}};
 
 static const char* pausedText = "Paused - Press [R] to resume";
 
@@ -522,6 +522,7 @@ void UpdatePlayingScreen(void)
 void DrawPlayingScreen(double alpha)
 {
     BeginDrawing();
+
     ClearBackground(BLACK);
     DrawText("PLAYING", 4, 4, 20, RAYWHITE);
     if (state == PAUSED)
