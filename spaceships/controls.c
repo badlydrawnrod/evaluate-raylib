@@ -245,6 +245,24 @@ static void CheckGamepad(GamepadNumber gamepad, ControllerId controller)
     }
 }
 
+// Check the keyboard for quitting this screen.
+static void CheckKeyboardQuit(KeyboardKey quitKey)
+{
+    if (IsKeyReleased(quitKey))
+    {
+        state = CANCELLED;
+    }
+}
+
+// Check a gamepad for quitting this screen.
+static void CheckGamepadQuit(GamepadNumber gamepad, GamepadButton quitButton)
+{
+    if (IsGamepadAvailable(gamepad) && IsGamepadButtonReleased(gamepad, quitButton))
+    {
+        state = CANCELLED;
+    }
+}
+
 // Check which controllers are available as this can change from frame to frame.
 static void UpdateAvailableControllers(void)
 {
@@ -458,6 +476,13 @@ void CheckTriggersControlsScreen(void)
     CheckGamepad(GAMEPAD_PLAYER2, CONTROLLER_GAMEPAD2);
     CheckGamepad(GAMEPAD_PLAYER3, CONTROLLER_GAMEPAD3);
     CheckGamepad(GAMEPAD_PLAYER4, CONTROLLER_GAMEPAD4);
+
+    // Check if this screen should be abandoned.
+    CheckKeyboardQuit(KEY_ESCAPE);
+    CheckGamepadQuit(GAMEPAD_PLAYER1, GAMEPAD_BUTTON_MIDDLE_RIGHT);
+    CheckGamepadQuit(GAMEPAD_PLAYER2, GAMEPAD_BUTTON_MIDDLE_RIGHT);
+    CheckGamepadQuit(GAMEPAD_PLAYER3, GAMEPAD_BUTTON_MIDDLE_RIGHT);
+    CheckGamepadQuit(GAMEPAD_PLAYER4, GAMEPAD_BUTTON_MIDDLE_RIGHT);
 }
 
 bool IsCancelledControlsScreen(void)

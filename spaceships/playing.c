@@ -100,7 +100,7 @@ const Command shipCommands[][MAX_LINES] = {
          {LINE, {0, -1}},
          {END}}};
 
-static const char* pausedText = "Paused";
+static const char* pausedText = "Paused - Press [R] to resume";
 
 static int screenWidth;
 static int screenHeight;
@@ -563,7 +563,7 @@ void DrawPlayingScreen(double alpha)
 void CheckTriggersPlayingScreen(void)
 {
     // Check for player(s) choosing to pause / resume / quit.
-    CheckKeyboard(KEY_P, KEY_R);
+    CheckKeyboard(KEY_ESCAPE, KEY_R);
     CheckGamepad(GAMEPAD_PLAYER1, GAMEPAD_BUTTON_MIDDLE_RIGHT, GAMEPAD_BUTTON_MIDDLE_LEFT);
     CheckGamepad(GAMEPAD_PLAYER2, GAMEPAD_BUTTON_MIDDLE_RIGHT, GAMEPAD_BUTTON_MIDDLE_LEFT);
     CheckGamepad(GAMEPAD_PLAYER3, GAMEPAD_BUTTON_MIDDLE_RIGHT, GAMEPAD_BUTTON_MIDDLE_LEFT);

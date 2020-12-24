@@ -15,13 +15,13 @@ static bool startRequested;
 static bool quitRequested;
 static MenuState state;
 
-static void CheckKeyboard(KeyboardKey selectKey, KeyboardKey cancelKey)
+static void CheckKeyboard(KeyboardKey selectKey, KeyboardKey quitKey)
 {
     startRequested = startRequested || IsKeyReleased(selectKey);
-    quitRequested = quitRequested || IsKeyReleased(cancelKey);
+    quitRequested = quitRequested || IsKeyReleased(quitKey);
 }
 
-static void CheckGamepad(GamepadNumber gamepad, GamepadButton selectButton, GamepadButton cancelButton)
+static void CheckGamepad(GamepadNumber gamepad, GamepadButton selectButton, GamepadButton quitButton)
 {
     if (!IsGamepadAvailable(gamepad))
     {
@@ -29,7 +29,7 @@ static void CheckGamepad(GamepadNumber gamepad, GamepadButton selectButton, Game
     }
 
     startRequested = startRequested || IsGamepadButtonReleased(gamepad, selectButton);
-    quitRequested = quitRequested || IsGamepadButtonReleased(gamepad, cancelButton);
+    quitRequested = quitRequested || IsGamepadButtonReleased(gamepad, quitButton);
 }
 
 void InitMenuScreen(void)
@@ -67,8 +67,8 @@ void DrawMenuScreen(double alpha)
     ClearBackground(BLACK);
     BeginDrawing();
     DrawText("MENU", 4, 4, 20, RAYWHITE);
-    int width = MeasureText("Press [FIRE] to start", 20);
-    DrawText("Press [FIRE] to start", (screenWidth - width) / 2, 7 * screenHeight / 8, 20, RAYWHITE);
+    int width = MeasureText("Press [Space] / Controller (A) to start", 20);
+    DrawText("Press [Space] / Controller (A) to start", (screenWidth - width) / 2, 7 * screenHeight / 8, 20, RAYWHITE);
     EndDrawing();
 }
 
