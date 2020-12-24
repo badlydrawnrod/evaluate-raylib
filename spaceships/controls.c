@@ -280,7 +280,7 @@ static void UpdateAvailableControllers(void)
 
 void InitControlsScreen(void)
 {
-    scoreFont = LoadFont("assets/terminal/Mecha.ttf");
+    scoreFont = LoadFont("assets/Mecha.ttf");
     screenWidth = GetScreenWidth();
     screenHeight = GetScreenHeight();
 

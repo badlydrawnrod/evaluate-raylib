@@ -14,6 +14,8 @@
 #define SHOTS_PER_PLAYER 5
 #define MAX_SHOTS (SHOTS_PER_PLAYER * MAX_PLAYERS)
 
+#define MAX_LINES 12
+
 typedef Vector2 Position;
 typedef Vector2 Velocity;
 typedef float Heading;
@@ -44,15 +46,59 @@ typedef struct
     Heading heading;
 } Shot;
 
+// Types of draw command.
+typedef enum
+{
+    END,  // Indicates the last command.
+    MOVE, // Move to a given position.
+    LINE  // Draw a line from the current position to the given position. If there is no current position, start from the origin.
+} CommandType;
+
+// A draw command.
+typedef struct
+{
+    CommandType type;
+    Vector2 pos;
+} Command;
+
 static Ship ships[MAX_PLAYERS];
 static int numPlayers = 0;
 
 static Shot shots[MAX_PLAYERS * SHOTS_PER_PLAYER];
 
-static Color shipColours[4];
+static Color shipColours[MAX_PLAYERS];
 
-const Vector2 shipLines[] = {{-1, 1}, {0, -1}, {1, 1}, {0, 0.5f}, {-1, 1}};
+// Shot appearance.
 const Vector2 shotLines[] = {{0, -0.25f}, {0, 0.25f}};
+
+// Ship appearance.
+const Command shipCommands[][MAX_LINES] = {
+        // Ship 0.
+        {{MOVE, {-1, 1}}, {LINE, {0, -1}}, {LINE, {1, 1}}, {LINE, {0, 0.5f}}, {LINE, {-1, 1}}, {END}},
+        // Ship 1.
+        {{MOVE, {0, -1}}, {LINE, {1, 0.5f}}, {LINE, {0, 1}}, {LINE, {-1, 0.5f}}, {LINE, {0, -1}}, {END}},
+        // Ship 2.
+        {{MOVE, {0, -1}},
+         {LINE, {0.5f, 0}},
+         {LINE, {1, 0.3f}},
+         {LINE, {0.25f, 1}},
+         {LINE, {-0.25f, 1}},
+         {LINE, {-1, 0.3f}},
+         {LINE, {-0.5f, 0}},
+         {LINE, {0, -1}},
+         {END}},
+        // Ship 3.
+        {{MOVE, {0, -1}},
+         {LINE, {0.25f, 0.25f}},
+         {LINE, {1, 0}},
+         {LINE, {1, 1}},
+         {LINE, {0.5f, 0.75f}},
+         {LINE, {-0.5f, 0.75f}},
+         {LINE, {-1, 1}},
+         {LINE, {-1, 0}},
+         {LINE, {-0.25f, 0.25f}},
+         {LINE, {0, -1}},
+         {END}}};
 
 static const char* pausedText = "Paused";
 
@@ -131,21 +177,21 @@ static Vector2 Move(Position pos, Velocity vel)
     pos = Vector2Add(pos, vel);
 
     // Wrap the position around the play area.
-    if (pos.x >= screenWidth)
+    if (pos.x >= (float)screenWidth)
     {
-        pos.x -= screenWidth;
+        pos.x -= (float)screenWidth;
     }
     if (pos.x < 0)
     {
-        pos.x += screenWidth;
+        pos.x += (float)screenWidth;
     }
-    if (pos.y >= screenHeight)
+    if (pos.y >= (float)screenHeight)
     {
-        pos.y -= screenHeight;
+        pos.y -= (float)screenHeight;
     }
     if (pos.y < 0)
     {
-        pos.y += screenHeight;
+        pos.y += (float)screenHeight;
     }
 
     return pos;
@@ -260,14 +306,42 @@ static void UpdateShot(Shot* shot)
     --(shot->alive);
 }
 
-static void DrawShipAt(Vector2 pos, float heading, Color colour)
+static void DrawShipAt(int shipType, Vector2 pos, float heading, Color colour)
 {
-    Vector2 points[5];
-    for (int i = 0; i < 5; i++)
+    Vector2 points[MAX_LINES];
+
+    // Default to starting at the origin.
+    Vector2 here = Vector2Add(Vector2Scale(Vector2Rotate((Vector2){0, 0}, heading), SHIP_SCALE), pos);
+
+    int numPoints = 0;
+    const Command* commands = shipCommands[shipType];
+    for (int i = 0; commands[i].type != END; i++)
     {
-        points[i] = Vector2Add(Vector2Scale(Vector2Rotate(shipLines[i], heading), SHIP_SCALE), pos);
+        const Vector2 coord = Vector2Add(Vector2Scale(Vector2Rotate(commands[i].pos, heading), SHIP_SCALE), pos);
+        if (commands[i].type == LINE)
+        {
+            if (numPoints == 0)
+            {
+                points[0] = here;
+                ++numPoints;
+            }
+            points[numPoints] = coord;
+            ++numPoints;
+        }
+        else if (commands[i].type == MOVE)
+        {
+            if (numPoints > 0)
+            {
+                DrawLineStrip(points, numPoints, colour);
+                numPoints = 0;
+            }
+        }
+        here = coord;
     }
-    DrawLineStrip(points, 5, colour);
+    if (numPoints > 0)
+    {
+        DrawLineStrip(points, numPoints, colour);
+    }
 }
 
 static void DrawShip(const Ship* ship, double alpha)
@@ -283,25 +357,26 @@ static void DrawShip(const Ship* ship, double alpha)
     const bool overlapsLeft = pos.x - SHIP_OVERLAP < 0;
     const bool overlapsRight = pos.x + SHIP_OVERLAP >= (float)screenWidth;
 
-    Color shipColour = shipColours[ship->index];
+    const Color shipColour = shipColours[ship->index];
+    const int shipType = ship->index;
 
-    DrawShipAt(pos, heading, shipColour);
+    DrawShipAt(shipType, pos, heading, shipColour);
 
     if (overlapsTop)
     {
-        DrawShipAt(Vector2Add(pos, (Vector2){0, (float)screenHeight}), heading, shipColour);
+        DrawShipAt(shipType, Vector2Add(pos, (Vector2){0, (float)screenHeight}), heading, shipColour);
     }
     if (overlapsBottom)
     {
-        DrawShipAt(Vector2Add(pos, (Vector2){0, (float)-screenHeight}), heading, shipColour);
+        DrawShipAt(shipType, Vector2Add(pos, (Vector2){0, (float)-screenHeight}), heading, shipColour);
     }
     if (overlapsLeft)
     {
-        DrawShipAt(Vector2Add(pos, (Vector2){(float)screenWidth, 0}), heading, shipColour);
+        DrawShipAt(shipType, Vector2Add(pos, (Vector2){(float)screenWidth, 0}), heading, shipColour);
     }
     if (overlapsRight)
     {
-        DrawShipAt(Vector2Add(pos, (Vector2){(float)-screenWidth, 0}), heading, shipColour);
+        DrawShipAt(shipType, Vector2Add(pos, (Vector2){(float)-screenWidth, 0}), heading, shipColour);
     }
 }
 
@@ -363,12 +438,13 @@ void InitPlayingScreen(int players, const ControllerId* controllers)
     numPlayers = players;
     for (int i = 0; i < players; i++)
     {
-        float angle = i * (2 * 3.141592654f) / numPlayers;
+        float angle = (float)i * (2 * 3.141592654f) / (float)numPlayers;
         ships[i].controller = controllers[i];
         ships[i].alive = true;
-        ships[i].pos.x = screenWidth / 2.0f + cosf(angle) * screenHeight / 3;
-        ships[i].pos.y = screenHeight / 2.0f + sinf(angle) * screenHeight / 3;
-        ships[i].heading = RAD2DEG * atan2f(screenHeight / 2.0f - ships[i].pos.y, screenWidth / 2.0f - ships[i].pos.x);
+        ships[i].pos.x = (float)screenWidth / 2.0f + cosf(angle) * (float)screenHeight / 3;
+        ships[i].pos.y = (float)screenHeight / 2.0f + sinf(angle) * (float)screenHeight / 3;
+        ships[i].heading =
+                RAD2DEG * atan2f((float)screenHeight / 2.0f - ships[i].pos.y, (float)screenWidth / 2.0f - ships[i].pos.x);
         ships[i].vel = (Vector2){0, 0};
     }
 

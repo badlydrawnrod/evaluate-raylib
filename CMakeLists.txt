@@ -6,7 +6,7 @@ set(CMAKE_C_STANDARD 99)
 include(FetchContent)
 
 # Search for a raylib-config.cmake. Fetch it and build it if we can't find one.
-find_package(raylib 3.0 QUIET)
+find_package(raylib 3.5 QUIET)
 if (NOT raylib_FOUND)
 
     FetchContent_Declare(

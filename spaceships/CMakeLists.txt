@@ -18,8 +18,11 @@ if (EMSCRIPTEN)
     endif ()
 endif ()
 
-add_executable(${PROJECT_NAME} spaceships.c controls.c menu.c playing.c spaceships.h)
-target_link_libraries(${PROJECT_NAME} raylib)
+add_executable(spaceships spaceships.c controls.c menu.c playing.c spaceships.h)
+target_link_libraries(spaceships raylib)
+
+add_executable(advanced_spaceships advanced_spaceships.c controls.c menu.c playing.c spaceships.h bdr/loop.h)
+target_link_libraries(advanced_spaceships raylib)
 
 set(spaceships_assets)
 file(GLOB assets assets/*)
