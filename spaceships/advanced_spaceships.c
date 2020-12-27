@@ -1,3 +1,4 @@
+#define BDR_LOOP_IMPLEMENTATION
 #define BDR_QUIT_LOOP ShouldQuit
 #include "bdr/loop.h"
 #include "raylib.h"
@@ -42,20 +43,20 @@ void InitScreens(void)
 
 static void InitTiming(void)
 {
-    timing.t = 0.0;
-    timing.updateInterval = 1.0 / UPDATE_FPS;
+    bdr_loopTiming.t = 0.0;
+    bdr_loopTiming.updateInterval = 1.0 / UPDATE_FPS;
 #if defined(CAP_FRAME_RATE)
-    timing.renderInterval = 1.0 / renderFps;
+    bdr_loopTiming.renderInterval = 1.0 / renderFps;
 #else
     timing.renderInterval = 0.0;
 #endif
-    timing.accumulator = 0.0;
-    timing.alpha = 0.0;
-    timing.lastTime = GetTime();
-    timing.lastDrawTime = timing.lastTime;
+    bdr_loopTiming.accumulator = 0.0;
+    bdr_loopTiming.alpha = 0.0;
+    bdr_loopTiming.lastTime = GetTime();
+    bdr_loopTiming.lastDrawTime = bdr_loopTiming.lastTime;
 }
 
-static void FixedUpdate(void)
+void FixedUpdate(void)
 {
     switch (currentScreen)
     {
@@ -112,12 +113,12 @@ static void FixedUpdate(void)
     }
 }
 
-static void Update(double elapsed)
+void Update(double elapsed)
 {
     (void)elapsed;
 }
 
-static void CheckTriggers(void)
+void CheckTriggers(void)
 {
     if (IsKeyPressed(KEY_F11))
     {
@@ -146,7 +147,7 @@ static void CheckTriggers(void)
     }
 }
 
-static void Draw(double alpha)
+void Draw(double alpha)
 {
     switch (currentScreen)
     {
@@ -164,17 +165,19 @@ static void Draw(double alpha)
     }
 }
 
-static bool ShouldQuit(void)
+#if !defined(PLATFORM_WEB) && !defined(EMSCRIPTEN)
+BDRLDEF bool ShouldQuit(void)
 {
     return currentScreen == QUIT || WindowShouldClose();
 }
+#endif
 
 int main(void)
 {
 #if !defined(NO_MSAA)
     SetConfigFlags(FLAG_MSAA_4X_HINT);
 #endif
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Advanced Spaceships");
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Advanced Spaceships ");
     SetTargetFPS(renderFps);
     SetExitKey(0);
 
