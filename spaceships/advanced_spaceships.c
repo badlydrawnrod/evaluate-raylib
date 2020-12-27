@@ -1,5 +1,5 @@
 #define BDR_LOOP_IMPLEMENTATION
-#define BDR_QUIT_LOOP ShouldQuit
+#define BDR_LOOP_SHOULD_QUIT ShouldQuit
 #include "bdr/loop.h"
 #include "raylib.h"
 #include "spaceships.h"
@@ -39,21 +39,6 @@ static Screen currentScreen;
 void InitScreens(void)
 {
     currentScreen = NONE;
-}
-
-static void InitTiming(void)
-{
-    bdr_loopTiming.t = 0.0;
-    bdr_loopTiming.updateInterval = 1.0 / UPDATE_FPS;
-#if defined(CAP_FRAME_RATE)
-    bdr_loopTiming.renderInterval = 1.0 / renderFps;
-#else
-    timing.renderInterval = 0.0;
-#endif
-    bdr_loopTiming.accumulator = 0.0;
-    bdr_loopTiming.alpha = 0.0;
-    bdr_loopTiming.lastTime = GetTime();
-    bdr_loopTiming.lastDrawTime = bdr_loopTiming.lastTime;
 }
 
 void FixedUpdate(void)
@@ -161,6 +146,10 @@ void Draw(double alpha)
         DrawPlayingScreen(alpha);
         break;
     default:
+        // Draw, so that we continue to process events.
+        BeginDrawing();
+        ClearBackground(DARKGRAY);
+        EndDrawing();
         break;
     }
 }
@@ -168,7 +157,7 @@ void Draw(double alpha)
 #if !defined(PLATFORM_WEB) && !defined(EMSCRIPTEN)
 BDRLDEF bool ShouldQuit(void)
 {
-    return currentScreen == QUIT || WindowShouldClose();
+    return WindowShouldClose() || currentScreen == QUIT;
 }
 #endif
 
@@ -180,11 +169,10 @@ int main(void)
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Advanced Spaceships ");
     SetTargetFPS(renderFps);
     SetExitKey(0);
-
-    InitTiming();
     InitScreens();
 
     RunMainLoop();
+
     CloseWindow();
 
     return 0;
