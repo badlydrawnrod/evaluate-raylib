@@ -218,24 +218,6 @@ static void UpdateDrawFrame(void)
     }
 }
 
-static void Unload(void)
-{
-    // Workaround until I make a decision on resource management.
-    switch (currentScreen)
-    {
-    case MENU:
-        FinishMenuScreen();
-        break;
-    case CONTROLLER_SELECTION:
-        FinishControlsScreen();
-        break;
-    case PLAYING:
-        FinishPlayingScreen();
-    default:
-        break;
-    }
-}
-
 int main(void)
 {
 #if !defined(NO_MSAA)
@@ -257,7 +239,6 @@ int main(void)
     }
 #endif
 
-    Unload();
     CloseWindow();
 
     return 0;

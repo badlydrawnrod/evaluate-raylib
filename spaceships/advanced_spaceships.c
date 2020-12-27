@@ -1,3 +1,4 @@
+#define BDR_QUIT_LOOP ShouldQuit
 #include "bdr/loop.h"
 #include "raylib.h"
 #include "spaceships.h"
@@ -163,22 +164,9 @@ static void Draw(double alpha)
     }
 }
 
-static void Unload(void)
+static bool ShouldQuit(void)
 {
-    // Workaround until I make a decision on resource management.
-    switch (currentScreen)
-    {
-    case MENU:
-        FinishMenuScreen();
-        break;
-    case CONTROLLER_SELECTION:
-        FinishControlsScreen();
-        break;
-    case PLAYING:
-        FinishPlayingScreen();
-    default:
-        break;
-    }
+    return currentScreen == QUIT || WindowShouldClose();
 }
 
 int main(void)
@@ -193,16 +181,7 @@ int main(void)
     InitTiming();
     InitScreens();
 
-#if defined(PLATFORM_WEB) || defined(EMSCRIPTEN)
-    emscripten_set_main_loop(UpdateDrawFrame, 0, 1);
-#else
-    while (currentScreen != QUIT && !WindowShouldClose())
-    {
-        UpdateDrawFrame();
-    }
-#endif
-
-    Unload();
+    RunMainLoop();
     CloseWindow();
 
     return 0;

@@ -3,6 +3,7 @@
 #include "raylib.h"
 
 #include <math.h>
+#include <stdbool.h>
 
 #if !defined(BDR_MAX_DELTA)
 #define BDR_MAX_DELTA 0.1f
@@ -25,8 +26,21 @@
 #define BDR_CHECK_TRIGGERS CheckTriggers
 #endif
 
+// The update function itself.
 #if !defined(BDR_UPDATE_DRAW_FRAME)
 #define BDR_UPDATE_DRAW_FRAME UpdateDrawFrame
+#define IMPLEMENT_UPDATE_DRAW_FRAME
+#endif
+
+// The function that tells the loop to quit.
+#if !defined(BDR_QUIT_LOOP)
+#define BDR_QUIT_LOOP QuitLoop
+#define IMPLEMENT_QUIT_LOOP
+#endif
+
+// The main loop function.
+#if !defined(BDR_MAIN_LOOP)
+#define BDR_MAIN_LOOP RunMainLoop
 #endif
 
 static struct
@@ -40,11 +54,16 @@ static struct
     double lastDrawTime;   // When did we last draw?
 } timing;
 
-// Forward declare the functions used by the update function.
+// Forward declare the functions used by the update function and the main loop function.
 static void BDR_FIXED_UPDATE(void);
 static void BDR_UPDATE(double elapsed);
 static void BDR_CHECK_TRIGGERS(void);
 static void BDR_DRAW(double alpha);
+static void BDR_UPDATE_DRAW_FRAME(void);
+static bool BDR_QUIT_LOOP(void);
+
+#if defined(IMPLEMENT_UPDATE_DRAW_FRAME)
+#undef IMPLEMENT_UPDATE_DRAW_FRAME
 
 static void BDR_UPDATE_DRAW_FRAME(void)
 {
@@ -86,4 +105,29 @@ static void BDR_UPDATE_DRAW_FRAME(void)
         BDR_CHECK_TRIGGERS();
 #endif
     }
+}
+
+#endif // IMPLEMENT_UPDATE_DRAW_FRAME
+
+#if defined(IMPLEMENT_QUIT_LOOP)
+#undef IMPLEMENT_QUIT_LOOP
+
+static bool BDR_QUIT_LOOP(void)
+{
+    return WindowShouldClose();
+}
+
+#endif // IMPLEMENT_QUIT_LOOP
+
+// Run the main loop until told to quit.
+static void BDR_MAIN_LOOP(void)
+{
+#if defined(PLATFORM_WEB) || defined(EMSCRIPTEN)
+    emscripten_set_main_loop(BDR_UPDATE_DRAW_FRAME, 0, 1);
+#else
+    while (!BDR_QUIT_LOOP())
+    {
+        BDR_UPDATE_DRAW_FRAME();
+    }
+#endif
 }
