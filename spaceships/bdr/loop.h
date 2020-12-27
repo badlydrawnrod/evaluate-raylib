@@ -153,4 +153,4 @@ BDRLDEF void BDR_MAIN_LOOP(void)
 #endif
 }
 
-#endif
+#endif // BDR_LOOP_IMPLEMENTATION
