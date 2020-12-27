@@ -179,7 +179,9 @@ void UpdateDrawFrame(void)
 
 int main(void)
 {
+#if !defined(NO_MSAA)
     SetConfigFlags(FLAG_MSAA_4X_HINT);
+#endif
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Loop");
     SetTargetFPS(renderFps);
 

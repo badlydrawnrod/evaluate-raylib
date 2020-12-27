@@ -3,6 +3,9 @@ project(0x37_evaluate_raylib)
 
 set(CMAKE_C_STANDARD 99)
 
+# Config options.
+option(NO_MSAA "Disable MSAA" OFF)
+
 include(FetchContent)
 
 # Search for a raylib-config.cmake. Fetch it and build it if we can't find one.
@@ -32,6 +35,10 @@ if (NOT raylib_FOUND)
 endif ()
 
 set(raylib_VERBOSE 1)
+
+if (NO_MSAA)
+    add_compile_definitions(NO_MSAA)
+endif ()
 
 add_subdirectory(simple)
 add_subdirectory(spaceships)
