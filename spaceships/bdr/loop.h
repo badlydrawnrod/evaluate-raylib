@@ -15,8 +15,8 @@ extern "C" {
 #define BDRLDEF extern
 #endif
 
-#if !defined(BDR_MAX_DELTA)
-#define BDR_MAX_DELTA 0.1f
+#if !defined(BDR_LOOP_MAX_DELTA)
+#define BDR_LOOP_MAX_DELTA 0.1
 #endif
 
 #if !defined(BDR_LOOP_UPDATE_INTERVAL)
@@ -139,7 +139,7 @@ BDRLDEF void BDR_LOOP_UPDATE_DRAW_FRAME(void)
 
     // See https://gafferongames.com/post/fix_your_timestep/ for more details on how this works.
     double now = GetTime();
-    const double delta = fmin(now - timing.lastTime, BDR_MAX_DELTA);
+    const double delta = fmin(now - timing.lastTime, BDR_LOOP_MAX_DELTA);
 
     // Fixed timestep updates.
     timing.lastTime = now;
@@ -158,7 +158,7 @@ BDRLDEF void BDR_LOOP_UPDATE_DRAW_FRAME(void)
     if (drawInterval >= timing.renderInterval)
     {
         // Per-frame update.
-        BDR_LOOP_UPDATE(fmin(drawInterval, BDR_MAX_DELTA));
+        BDR_LOOP_UPDATE(fmin(drawInterval, BDR_LOOP_MAX_DELTA));
 
         // Draw the frame.
         BDR_LOOP_DRAW(timing.alpha);

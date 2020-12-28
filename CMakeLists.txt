@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.11)
 project(0x37_evaluate_raylib)
 
 set(CMAKE_C_STANDARD 99)
