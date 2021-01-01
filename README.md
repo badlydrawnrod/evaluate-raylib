@@ -182,6 +182,8 @@ Open a web browser and navigate to http://localhost:8080/simple/track3d.html. Yo
 
 # Building for Raspberry Pi desktop
 
+Note that these instructions are known to work for a physical Raspberry Pi (tested on a Raspberry Pi 400) and for a VM running [**Raspberry Pi Desktop**](https://www.raspberrypi.org/software/raspberry-pi-desktop/).
+
 ## Prerequisites
 
 ### **CMake** and **Ninja**
