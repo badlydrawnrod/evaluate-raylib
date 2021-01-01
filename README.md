@@ -12,7 +12,7 @@ Pick the platform that you want to build for from one of these links.
 - [Building and running on Windows](#building-and-running-on-windows)
 - [Building for the web with Emscripten](#building-for-the-web-with-emscripten)
 - [Building for Raspberry Pi desktop](#building-for-raspberry-pi-desktop)
-- [Building for Raspberry Pi 4 / 4000 native mode](#building-for-raspberry-pi-4--4000-native-mode)
+- [Building for Raspberry Pi 4 / 400 native mode](#building-for-raspberry-pi-4--400-native-mode)
 
 # Building and running on Windows
 
@@ -256,7 +256,7 @@ $ ./track3d
 
 You should see a retro-looking 3d racetrack.
 
-# Building for Raspberry Pi 4 / 4000 native mode
+# Building for Raspberry Pi 4 / 400 native mode
 ## Prerequisites
 
 ### **CMake** and **Ninja**
