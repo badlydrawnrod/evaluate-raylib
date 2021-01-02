@@ -12,7 +12,7 @@ Pick the platform that you want to build for from one of these links.
 - [Building and running on Windows](#building-and-running-on-windows)
 - [Building for the web with Emscripten](#building-for-the-web-with-emscripten)
 - [Building for Raspberry Pi desktop](#building-for-raspberry-pi-desktop)
-- [Building for Raspberry Pi 4 / 4000 native mode](#building-for-raspberry-pi-4--4000-native-mode)
+- [Building for Raspberry Pi 4 / 400 native mode](#building-for-raspberry-pi-4--400-native-mode)
 
 # Building and running on Windows
 
@@ -182,6 +182,8 @@ Open a web browser and navigate to http://localhost:8080/simple/track3d.html. Yo
 
 # Building for Raspberry Pi desktop
 
+Note that these instructions are known to work for a physical Raspberry Pi (tested on a Raspberry Pi 400) and for a VM running [**Raspberry Pi Desktop**](https://www.raspberrypi.org/software/raspberry-pi-desktop/).
+
 ## Prerequisites
 
 ### **CMake** and **Ninja**
@@ -256,7 +258,7 @@ $ ./track3d
 
 You should see a retro-looking 3d racetrack.
 
-# Building for Raspberry Pi 4 / 4000 native mode
+# Building for Raspberry Pi 4 / 400 native mode
 ## Prerequisites
 
 ### **CMake** and **Ninja**
