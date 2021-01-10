@@ -13,6 +13,8 @@ include(FetchContent)
 find_package(raylib 3.5 QUIET)
 if (NOT raylib_FOUND)
 
+    # Option 1 - get raylib from the latest master build.
+    #
     FetchContent_Declare(
             raylib
             URL https://github.com/raysan5/raylib/archive/master.tar.gz
@@ -20,6 +22,19 @@ if (NOT raylib_FOUND)
             #            GIT_REPOSITORY ${CMAKE_SOURCE_DIR}/../3rdparty/raylib
             #            GIT_TAG rod2
     )
+
+    # Option 2 - clone raylib into a parallel directory.
+    #
+    # Do the following (manual) step before running CMake.
+    #
+    #       git clone --depth=1 https://github.com/raysan5/raylib
+    #
+    #    FetchContent_Declare(
+    #            raylib
+    #            GIT_REPOSITORY ${CMAKE_SOURCE_DIR}/..//raylib
+    #            GIT_TAG master
+    #    )
+
     FetchContent_GetProperties(raylib)
 
     # Download and build raylib.

@@ -4,6 +4,7 @@ Evaluating [raylib](http://www.raylib.com/) with some simple test programs.
 > ## **raylib** is not a prerequisite
 >
 > It may seem strange, but you don't need to install **raylib** as the build steps will download it automatically.
+> See `CMakeLists.txt` for details, or for an alternative if you encounter a problem.
 
 ## Getting Started
 
