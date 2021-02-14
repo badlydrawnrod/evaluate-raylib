@@ -58,3 +58,4 @@ endif ()
 
 add_subdirectory(simple)
 add_subdirectory(spaceships)
+add_subdirectory(tanks)
