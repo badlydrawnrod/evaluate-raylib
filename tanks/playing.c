@@ -6,7 +6,7 @@
 
 #define TANK_SCALE 16.0f
 #define TANK_OVERLAP (2 * TANK_SCALE)
-#define MAX_ROTATION_SPEED 4.0f
+#define MAX_ROTATION_SPEED 2.0f
 #define TANK_ACCEL 0.05f
 #define MAX_SPEED 2.0f
 #define MAX_REVERSE_SPEED -1.0f
@@ -32,6 +32,7 @@ typedef enum
     CANCELLED
 } PlayingState;
 
+// TODO: lidar
 typedef struct
 {
     bool alive;
@@ -39,6 +40,7 @@ typedef struct
     Position pos;
     Velocity vel;
     Heading heading;
+    Heading gunHeading;
     Speed speed;
     ControllerId controller;
     int index;
@@ -87,6 +89,18 @@ const Command tankCommands[][MAX_LINES] = {
         {{MOVE, {-0.67f, 1}}, {LINE, {0.67f, 1}}, {LINE, {1.0f, 0.67f}}, {LINE, {1, -1}}, {LINE, {-1, -1}}, {LINE, {-1, 0.67f}}, {LINE, {-0.67f, 1}}, {END, {0, 0}}},
         // Tank 3.
         {{MOVE, {-0.67f, 1}}, {LINE, {0.67f, 1}}, {LINE, {1.0f, 0.67f}}, {LINE, {1, -1}}, {LINE, {-1, -1}}, {LINE, {-1, 0.67f}}, {LINE, {-0.67f, 1}}, {END, {0, 0}}},
+    };
+    
+// Gun appearances. Currently they're all identical.
+const Command gunCommands[][MAX_LINES] = {
+        // Gun 0.
+        {{MOVE, {-0.125f, 1}}, {LINE, {0.125f, 1}}, {LINE, {0.125f, -0.125f}}, {LINE, {-0.125f, -0.125f}}, {LINE, {-0.125f, 1}}, {END, {0, 0}}},
+        // Gun 1.
+        {{MOVE, {-0.125f, 1}}, {LINE, {0.125f, 1}}, {LINE, {0.125f, -0.125f}}, {LINE, {-0.125f, -0.125f}}, {LINE, {-0.125f, 1}}, {END, {0, 0}}},
+        // Gun 2.
+        {{MOVE, {-0.125f, 1}}, {LINE, {0.125f, 1}}, {LINE, {0.125f, -0.125f}}, {LINE, {-0.125f, -0.125f}}, {LINE, {-0.125f, 1}}, {END, {0, 0}}},
+        // Gun 3.
+        {{MOVE, {-0.125f, 1}}, {LINE, {0.125f, 1}}, {LINE, {0.125f, -0.125f}}, {LINE, {-0.125f, -0.125f}}, {LINE, {-0.125f, 1}}, {END, {0, 0}}}
     };
 
 static const char* pausedText = "Paused - Press [R] to resume";
@@ -177,6 +191,27 @@ static float GetControllerTurnRate(int controller)
         return (IsKeyDown(KEY_D) ? 1.0f : 0.0f) - (IsKeyDown(KEY_A) ? 1.0f : 0.0f);
     case CONTROLLER_KEYBOARD2:
         return (IsKeyDown(KEY_RIGHT) ? 1.0f : 0.0f) - (IsKeyDown(KEY_LEFT) ? 1.0f : 0.0f);
+    default:
+        return 0.0f;
+    }
+}
+
+static float GetGunTurnRate(int controller)
+{
+    switch (controller)
+    {
+    case CONTROLLER_GAMEPAD1:
+        return GetGamepadAxisMovement(GAMEPAD_PLAYER1, GAMEPAD_AXIS_RIGHT_X);
+    case CONTROLLER_GAMEPAD2:
+        return GetGamepadAxisMovement(GAMEPAD_PLAYER2, GAMEPAD_AXIS_RIGHT_X);
+    case CONTROLLER_GAMEPAD3:
+        return GetGamepadAxisMovement(GAMEPAD_PLAYER3, GAMEPAD_AXIS_RIGHT_X);
+    case CONTROLLER_GAMEPAD4:
+        return GetGamepadAxisMovement(GAMEPAD_PLAYER4, GAMEPAD_AXIS_RIGHT_X);
+    case CONTROLLER_KEYBOARD1:
+        return (IsKeyDown(KEY_E) ? 1.0f : 0.0f) - (IsKeyDown(KEY_Q) ? 1.0f : 0.0f);
+    case CONTROLLER_KEYBOARD2:
+        return (IsKeyDown(KEY_PERIOD) ? 1.0f : 0.0f) - (IsKeyDown(KEY_COMMA) ? 1.0f : 0.0f);
     default:
         return 0.0f;
     }
@@ -287,6 +322,10 @@ static void UpdateTank(Tank* tank)
     tank->vel.x = cosf((tank->heading + 90) * DEG2RAD) * tank->speed;
     tank->vel.y = sinf((tank->heading + 90) * DEG2RAD) * tank->speed;
 
+    // Rotate the gun.
+    float gunAxis = GetGunTurnRate(tank->controller);
+    tank->gunHeading += gunAxis * MAX_ROTATION_SPEED;
+    
     // Move the tank.
     MoveTank(tank);
 }
@@ -309,8 +348,8 @@ static void CheckForFire(Tank* tank)
             {
                 Shot* shot = &shots[i];
                 shot->alive = SHOT_DURATION;
-                shot->heading = tank->heading;
-                Vector2 angle = {cosf((tank->heading + 90) * DEG2RAD), sinf((tank->heading + 90) * DEG2RAD)};
+                shot->heading = tank->heading + tank->gunHeading;
+                Vector2 angle = {cosf((shot->heading + 90) * DEG2RAD), sinf((shot->heading + 90) * DEG2RAD)};
                 shot->pos = Vector2Add(tank->pos, Vector2Scale(angle, TANK_SCALE));
                 shot->vel = Vector2Add(Vector2Scale(angle, SHOT_SPEED), tank->vel);
                 break;
@@ -329,15 +368,12 @@ static void UpdateShot(Shot* shot)
     --(shot->alive);
 }
 
-static void DrawTankAt(int tankType, Vector2 pos, float heading, Color colour)
+static void DrawCommands(const Command* commands, Vector2 pos, float heading, Color colour)
 {
     Vector2 points[MAX_LINES];
-
-    // Default to starting at the origin.
+    
     Vector2 here = Vector2Add(Vector2Scale(Vector2Rotate((Vector2){0, 0}, heading), TANK_SCALE), pos);
-
     int numPoints = 0;
-    const Command* commands = tankCommands[tankType];
     for (int i = 0; commands[i].type != END; i++)
     {
         const Vector2 coord = Vector2Add(Vector2Scale(Vector2Rotate(commands[i].pos, heading), TANK_SCALE), pos);
@@ -367,39 +403,62 @@ static void DrawTankAt(int tankType, Vector2 pos, float heading, Color colour)
     }
 }
 
+static void DrawTankAt(int tankType, Vector2 pos, float heading, float gunHeading, Color colour)
+{
+    DrawCommands(tankCommands[tankType], pos, heading, colour);
+    DrawCommands(gunCommands[tankType], pos, heading + gunHeading, colour);
+}
+
 static void DrawTank(const Tank* tank, double alpha)
 {
     // Interpolate the tank's drawing position with its velocity to reduce stutter.
     const Vector2 pos = Vector2Add(tank->pos, Vector2Scale(tank->vel, (float)alpha));
 
     const float heading = tank->heading;
+    const float gunHeading = tank->gunHeading;
 
     // Which edges of the play area does the tank overlap?
-    const bool overlapsTop = pos.y - TANK_OVERLAP < 0;
-    const bool overlapsBottom = pos.y + TANK_OVERLAP >= (float)screenHeight;
-    const bool overlapsLeft = pos.x - TANK_OVERLAP < 0;
-    const bool overlapsRight = pos.x + TANK_OVERLAP >= (float)screenWidth;
+    const bool overlapsTop = pos.y - TANK_OVERLAP < 0;                       // Going off the top of the screen.
+    const bool overlapsBottom = pos.y + TANK_OVERLAP >= (float)screenHeight; // Going off the bottom of the screen.
+    const bool overlapsLeft = pos.x - TANK_OVERLAP < 0;                      // Going off the left of the screen.
+    const bool overlapsRight = pos.x + TANK_OVERLAP >= (float)screenWidth;   // Going off the right of the screen.
 
     const Color tankColour = tankColours[tank->index];
     const int tankType = tank->index;
 
-    DrawTankAt(tankType, pos, heading, tankColour);
+    DrawTankAt(tankType, pos, heading, gunHeading, tankColour);
 
     if (overlapsTop)
     {
-        DrawTankAt(tankType, Vector2Add(pos, (Vector2){0, (float)screenHeight}), heading, tankColour);
+        DrawTankAt(tankType, Vector2Add(pos, (Vector2){0, (float)screenHeight}), heading, gunHeading, tankColour);
     }
     if (overlapsBottom)
     {
-        DrawTankAt(tankType, Vector2Add(pos, (Vector2){0, (float)-screenHeight}), heading, tankColour);
+        DrawTankAt(tankType, Vector2Add(pos, (Vector2){0, (float)-screenHeight}), heading, gunHeading, tankColour);
     }
     if (overlapsLeft)
     {
-        DrawTankAt(tankType, Vector2Add(pos, (Vector2){(float)screenWidth, 0}), heading, tankColour);
+        DrawTankAt(tankType, Vector2Add(pos, (Vector2){(float)screenWidth, 0}), heading, gunHeading, tankColour);
+        if (overlapsTop)
+        {
+            DrawTankAt(tankType, Vector2Add(pos, (Vector2){(float)screenWidth, (float)screenHeight}), heading, gunHeading, tankColour);
+        }
+        else if (overlapsBottom)
+        {
+            DrawTankAt(tankType, Vector2Add(pos, (Vector2){(float)screenWidth, (float)-screenHeight}), heading, gunHeading, tankColour);
+        }
     }
     if (overlapsRight)
     {
-        DrawTankAt(tankType, Vector2Add(pos, (Vector2){(float)-screenWidth, 0}), heading, tankColour);
+        DrawTankAt(tankType, Vector2Add(pos, (Vector2){(float)-screenWidth, 0}), heading, gunHeading, tankColour);
+        if (overlapsTop)
+        {
+            DrawTankAt(tankType, Vector2Add(pos, (Vector2){(float)-screenWidth, (float)screenHeight}), heading, gunHeading, tankColour);
+        }
+        else if (overlapsBottom)
+        {
+            DrawTankAt(tankType, Vector2Add(pos, (Vector2){(float)-screenWidth, (float)-screenHeight}), heading, gunHeading, tankColour);
+        }
     }
 }
 
@@ -468,6 +527,7 @@ void InitPlayingScreen(int players, const ControllerId* controllers)
         tanks[i].pos.y = (float)screenHeight / 2.0f + sinf(angle) * (float)screenHeight / 3;
         tanks[i].heading =
                 RAD2DEG * atan2f((float)screenHeight / 2.0f - tanks[i].pos.y, (float)screenWidth / 2.0f - tanks[i].pos.x);
+        tanks[i].gunHeading = 0.0f;
         tanks[i].vel = (Vector2){0, 0};
     }
 
