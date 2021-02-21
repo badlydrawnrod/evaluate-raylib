@@ -1,8 +1,9 @@
 #define BDR_LOOP_IMPLEMENTATION
 #define BDR_LOOP_SHOULD_QUIT ShouldQuit
+#include "tanks.h"
+
 #include "bdr/loop.h"
 #include "raylib.h"
-#include "tanks.h"
 
 #if defined(PLATFORM_WEB) || defined(EMSCRIPTEN)
 #include <emscripten/emscripten.h>
