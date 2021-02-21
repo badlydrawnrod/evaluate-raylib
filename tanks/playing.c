@@ -82,26 +82,74 @@ const Vector2 shotLines[] = {{0, -0.25f}, {0, 0.25f}};
 // Tank appearances (+x is right, +y is down). Currently they're all identical.
 const Command tankCommands[][MAX_LINES] = {
         // Tank 0.
-        {{MOVE, {-0.67f, -1}}, {LINE, {0.67f, -1}}, {LINE, {1.0f, -0.67f}}, {LINE, {1, 1}}, {LINE, {-1, 1}}, {LINE, {-1, -0.67f}}, {LINE, {-0.67f, -1}}, {END, {0, 0}}},
+        {{MOVE, {-0.67f, -1}},
+         {LINE, {0.67f, -1}},
+         {LINE, {1.0f, -0.67f}},
+         {LINE, {1, 1}},
+         {LINE, {-1, 1}},
+         {LINE, {-1, -0.67f}},
+         {LINE, {-0.67f, -1}},
+         {END, {0, 0}}},
         // Tank 1.
-        {{MOVE, {-0.67f, -1}}, {LINE, {0.67f, -1}}, {LINE, {1.0f, -0.67f}}, {LINE, {1, 1}}, {LINE, {-1, 1}}, {LINE, {-1, -0.67f}}, {LINE, {-0.67f, -1}}, {END, {0, 0}}},
+        {{MOVE, {-0.67f, -1}},
+         {LINE, {0.67f, -1}},
+         {LINE, {1.0f, -0.67f}},
+         {LINE, {1, 1}},
+         {LINE, {-1, 1}},
+         {LINE, {-1, -0.67f}},
+         {LINE, {-0.67f, -1}},
+         {END, {0, 0}}},
         // Tank 2.
-        {{MOVE, {-0.67f, -1}}, {LINE, {0.67f, -1}}, {LINE, {1.0f, -0.67f}}, {LINE, {1, 1}}, {LINE, {-1, 1}}, {LINE, {-1, -0.67f}}, {LINE, {-0.67f, -1}}, {END, {0, 0}}},
+        {{MOVE, {-0.67f, -1}},
+         {LINE, {0.67f, -1}},
+         {LINE, {1.0f, -0.67f}},
+         {LINE, {1, 1}},
+         {LINE, {-1, 1}},
+         {LINE, {-1, -0.67f}},
+         {LINE, {-0.67f, -1}},
+         {END, {0, 0}}},
         // Tank 3.
-        {{MOVE, {-0.67f, -1}}, {LINE, {0.67f, -1}}, {LINE, {1.0f, -0.67f}}, {LINE, {1, 1}}, {LINE, {-1, 1}}, {LINE, {-1, -0.67f}}, {LINE, {-0.67f, -1}}, {END, {0, 0}}}
-    };
-    
-// Gun appearances (+x is right, +y is down). Currently they're all identical.
+        {{MOVE, {-0.67f, -1}},
+         {LINE, {0.67f, -1}},
+         {LINE, {1.0f, -0.67f}},
+         {LINE, {1, 1}},
+         {LINE, {-1, 1}},
+         {LINE, {-1, -0.67f}},
+         {LINE, {-0.67f, -1}},
+         {END, {0, 0}}},
+};
+
+// Gun appearances. Currently they're all identical.
 const Command gunCommands[][MAX_LINES] = {
         // Gun 0.
-        {{MOVE, {-0.125f, -1}}, {LINE, {0.125f, -1}}, {LINE, {0.125f, 0.125f}}, {LINE, {-0.125f, 0.125f}}, {LINE, {-0.125f, -1}}, {END, {0, 0}}},
+        {{MOVE, {-0.125f, -1}},
+         {LINE, {0.125f, -1}},
+         {LINE, {0.125f, 0.125f}},
+         {LINE, {-0.125f, 0.125f}},
+         {LINE, {-0.125f, -1}},
+         {END, {0, 0}}},
         // Gun 1.
-        {{MOVE, {-0.125f, -1}}, {LINE, {0.125f, -1}}, {LINE, {0.125f, 0.125f}}, {LINE, {-0.125f, 0.125f}}, {LINE, {-0.125f, -1}}, {END, {0, 0}}},
+        {{MOVE, {-0.125f, -1}},
+         {LINE, {0.125f, -1}},
+         {LINE, {0.125f, 0.125f}},
+         {LINE, {-0.125f, 0.125f}},
+         {LINE, {-0.125f, -1}},
+         {END, {0, 0}}},
         // Gun 2.
-        {{MOVE, {-0.125f, -1}}, {LINE, {0.125f, -1}}, {LINE, {0.125f, 0.125f}}, {LINE, {-0.125f, 0.125f}}, {LINE, {-0.125f, -1}}, {END, {0, 0}}},
+        {{MOVE, {-0.125f, -1}},
+         {LINE, {0.125f, -1}},
+         {LINE, {0.125f, 0.125f}},
+         {LINE, {-0.125f, 0.125f}},
+         {LINE, {-0.125f, -1}},
+         {END, {0, 0}}},
         // Gun 3.
-        {{MOVE, {-0.125f, -1}}, {LINE, {0.125f, -1}}, {LINE, {0.125f, 0.125f}}, {LINE, {-0.125f, 0.125f}}, {LINE, {-0.125f, -1}}, {END, {0, 0}}}
-    };
+        {{MOVE, {-0.125f, -1}},
+         {LINE, {0.125f, -1}},
+         {LINE, {0.125f, 0.125f}},
+         {LINE, {-0.125f, 0.125f}},
+         {LINE, {-0.125f, -1}},
+         {END, {0, 0}}},
+};
 
 static const char* pausedText = "Paused - Press [R] to resume";
 
@@ -301,7 +349,7 @@ static void UpdateTank(Tank* tank)
     // Rotate the tank.
     float axis = GetControllerTurnRate(tank->controller);
     tank->heading += axis * MAX_ROTATION_SPEED;
-    
+
     // Accelerate the tank.
     if (IsControllerThrustDown(tank->controller))
     {
@@ -317,7 +365,7 @@ static void UpdateTank(Tank* tank)
     {
         tank->speed *= 0.9f;
     }
-    
+
     // The tank's velocity is in its direction of travel.
     tank->vel.x = cosf((tank->heading - 90) * DEG2RAD) * tank->speed;
     tank->vel.y = sinf((tank->heading - 90) * DEG2RAD) * tank->speed;
@@ -325,7 +373,7 @@ static void UpdateTank(Tank* tank)
     // Rotate the gun.
     float gunAxis = GetGunTurnRate(tank->controller);
     tank->gunHeading += gunAxis * MAX_ROTATION_SPEED;
-    
+
     // Move the tank.
     MoveTank(tank);
 }
@@ -371,7 +419,7 @@ static void UpdateShot(Shot* shot)
 static void DrawCommands(const Command* commands, Vector2 pos, float heading, Color colour)
 {
     Vector2 points[MAX_LINES];
-    
+
     Vector2 here = Vector2Add(Vector2Scale(Vector2Rotate((Vector2){0, 0}, heading), TANK_SCALE), pos);
     int numPoints = 0;
     for (int i = 0; commands[i].type != END; i++)
@@ -441,11 +489,13 @@ static void DrawTank(const Tank* tank, double alpha)
         DrawTankAt(tankType, Vector2Add(pos, (Vector2){(float)screenWidth, 0}), heading, gunHeading, tankColour);
         if (overlapsTop)
         {
-            DrawTankAt(tankType, Vector2Add(pos, (Vector2){(float)screenWidth, (float)screenHeight}), heading, gunHeading, tankColour);
+            DrawTankAt(tankType, Vector2Add(pos, (Vector2){(float)screenWidth, (float)screenHeight}), heading, gunHeading,
+                       tankColour);
         }
         else if (overlapsBottom)
         {
-            DrawTankAt(tankType, Vector2Add(pos, (Vector2){(float)screenWidth, (float)-screenHeight}), heading, gunHeading, tankColour);
+            DrawTankAt(tankType, Vector2Add(pos, (Vector2){(float)screenWidth, (float)-screenHeight}), heading, gunHeading,
+                       tankColour);
         }
     }
     if (overlapsRight)
@@ -453,11 +503,13 @@ static void DrawTank(const Tank* tank, double alpha)
         DrawTankAt(tankType, Vector2Add(pos, (Vector2){(float)-screenWidth, 0}), heading, gunHeading, tankColour);
         if (overlapsTop)
         {
-            DrawTankAt(tankType, Vector2Add(pos, (Vector2){(float)-screenWidth, (float)screenHeight}), heading, gunHeading, tankColour);
+            DrawTankAt(tankType, Vector2Add(pos, (Vector2){(float)-screenWidth, (float)screenHeight}), heading, gunHeading,
+                       tankColour);
         }
         else if (overlapsBottom)
         {
-            DrawTankAt(tankType, Vector2Add(pos, (Vector2){(float)-screenWidth, (float)-screenHeight}), heading, gunHeading, tankColour);
+            DrawTankAt(tankType, Vector2Add(pos, (Vector2){(float)-screenWidth, (float)-screenHeight}), heading, gunHeading,
+                       tankColour);
         }
     }
 }
@@ -525,9 +577,7 @@ void InitPlayingScreen(int players, const ControllerId* controllers)
         tanks[i].alive = true;
         tanks[i].pos.x = (float)screenWidth / 2.0f + cosf(angle) * (float)screenHeight / 3;
         tanks[i].pos.y = (float)screenHeight / 2.0f + sinf(angle) * (float)screenHeight / 3;
-        tanks[i].heading =
-                RAD2DEG * atan2f((float)screenHeight / 2.0f - tanks[i].pos.y, (float)screenWidth / 2.0f - tanks[i].pos.x);
-        tanks[i].heading = 0.0f;
+        tanks[i].heading = 180.0f + RAD2DEG * atan2f((float)screenHeight / 2.0f - tanks[i].pos.y, (float)screenWidth / 2.0f - tanks[i].pos.x);
         tanks[i].gunHeading = 0.0f;
         tanks[i].vel = (Vector2){0, 0};
     }
