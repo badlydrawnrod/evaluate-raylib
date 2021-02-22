@@ -18,11 +18,12 @@ if (EMSCRIPTEN)
     endif ()
 endif ()
 
-add_executable(tanks tanks.c controls.c menu.c playing.c tanks.h bdr/loop.h)
+add_executable(tanks tanks.c controls.c menu.c playing.c tanks.h)
+target_include_directories(tanks PRIVATE ${CMAKE_SOURCE_DIR})
 target_link_libraries(tanks raylib)
 
 set(tanks_assets)
-file(GLOB assets assets/*)
+file(GLOB assets ${CMAKE_SOURCE_DIR}/assets/*)
 list(APPEND tanks_assets ${assets})
 
 file(COPY ${tanks_assets} DESTINATION "assets/")
