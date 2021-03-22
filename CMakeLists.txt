@@ -58,5 +58,6 @@ if (NO_MSAA)
 endif ()
 
 add_subdirectory(simple)
+add_subdirectory(spaced)
 add_subdirectory(spaceships)
 add_subdirectory(tanks)
