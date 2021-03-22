@@ -4,6 +4,15 @@
 
 #define MAX_PLAYERS 4
 
+// Gamepad number (as it seems to have vanished from raylib.h)
+typedef enum
+{
+    GAMEPAD_PLAYER1 = 0,
+    GAMEPAD_PLAYER2 = 1,
+    GAMEPAD_PLAYER3 = 2,
+    GAMEPAD_PLAYER4 = 3
+} GamepadNumber;
+
 typedef enum ControllerId
 {
     CONTROLLER_UNASSIGNED = -1,

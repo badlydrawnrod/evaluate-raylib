@@ -80,7 +80,7 @@ int main()
     SetTargetFPS(UPDATE_FPS);
 
     renderTarget = LoadRenderTexture(VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
-    SetTextureFilter(renderTarget.texture, FILTER_ANISOTROPIC_16X);
+    SetTextureFilter(renderTarget.texture, TEXTURE_FILTER_ANISOTROPIC_16X);
 
 #if defined(PLATFORM_WEB) || defined(EMSCRIPTEN)
     emscripten_set_main_loop(UpdateDrawFrame, 0, 1);
