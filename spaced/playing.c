@@ -2,13 +2,16 @@
  * Spaced - a game about a perfect planet, as long as you obey the law.
  *
  * TODO:
- * - create a planet
- * - make it spin
+ * + create a planet
+ * + make it spin
+ * - make it spin based on the physics rate, not the frame rate
  * - put people on it, and make sure they spin with it
  * - apply gravity, to keep the people on the planet
  * - remove gravity and see the people float into space
  * - turn it into a game (spot bad people and launch them into the path of a UFO?)
- *
+ * - spaced people eventually form a message
+ * - draw some stars
+ * - remove the rest of the crap
  */
 
 #include "raylib.h"
@@ -666,6 +669,8 @@ void UpdatePlayingScreen(void)
     }
 }
 
+static float baseAngle = 0.0f; // TODO: move this!
+
 void DrawPlayingScreen(double alpha)
 {
     BeginDrawing();
@@ -703,9 +708,18 @@ void DrawPlayingScreen(double alpha)
         }
     }
 
-    // Draw the planet (next, make it rotate).
-    DrawCircleSector((Vector2){(float)screenWidth / 2, (float)screenHeight / 2}, (float)screenHeight / 3.0f, 0.0f, 360.0f, 72,
-                     GREEN);
+    Vector2 planetCentre = (Vector2){(float)screenWidth / 2, 2 * (float)screenHeight / 3 - 4.0f};
+
+    // Draw the planet.
+    DrawCircleSector(planetCentre, (float)screenHeight / 3.0f, 0.0f, 360.0f, 72, GREEN);
+
+    // Draw the rotating part of the planet.
+    baseAngle = fmodf(baseAngle + 0.1f, 30.0f);
+    for (float startAngle = 0.0f; startAngle < 360.0f; startAngle += 30.0f)
+    {
+        DrawRing(planetCentre, (float)screenHeight / 3.0f - 12.0f, (float)screenHeight / 3.0f, baseAngle + startAngle,
+                 baseAngle + startAngle + 15.0f, 15, BLUE);
+    }
 
     DrawFPS(screenWidth / 2 - 16, screenHeight - 24);
 
