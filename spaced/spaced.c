@@ -76,7 +76,7 @@ void FixedUpdate(void)
             {
                 controllers[i] = GetControllerAssignment(i);
             }
-            InitPlayingScreen(numPlayers, controllers);
+            InitPlayingScreen();
         }
         else if (IsCancelledControlsScreen())
         {

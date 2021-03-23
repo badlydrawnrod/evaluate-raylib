@@ -10,31 +10,13 @@ option(NO_MSAA "Disable MSAA" OFF)
 include(FetchContent)
 
 # Search for a raylib-config.cmake. Fetch it and build it if we can't find one.
-find_package(raylib 3.5 QUIET)
+find_package(raylib 3.7 QUIET)
 if (NOT raylib_FOUND)
 
-    # Option 1 - get raylib from the latest master build.
-    #
     FetchContent_Declare(
             raylib
-            URL https://github.com/raysan5/raylib/archive/master.tar.gz
-#            URL https://github.com/raysan5/raylib/archive/refs/heads/master.zip
-            #            If master is broken for some reason then uncomment this.
-            #            GIT_REPOSITORY ${CMAKE_SOURCE_DIR}/../3rdparty/raylib
-            #            GIT_TAG rod2
+            URL https://github.com/raysan5/raylib/archive/refs/tags/3.7.0.zip
     )
-
-    # Option 2 - clone raylib into a parallel directory.
-    #
-    # Do the following (manual) step before running CMake.
-    #
-    #       git clone --depth=1 https://github.com/raysan5/raylib
-    #
-    #    FetchContent_Declare(
-    #            raylib
-    #            GIT_REPOSITORY ${CMAKE_SOURCE_DIR}/..//raylib
-    #            GIT_TAG master
-    #    )
 
     FetchContent_GetProperties(raylib)
 
@@ -57,6 +39,7 @@ if (NO_MSAA)
     add_compile_definitions(NO_MSAA)
 endif ()
 
+add_subdirectory(collision_playground)
 add_subdirectory(simple)
 add_subdirectory(spaced)
 add_subdirectory(spaceships)

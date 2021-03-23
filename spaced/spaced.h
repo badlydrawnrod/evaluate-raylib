@@ -47,7 +47,7 @@ ControllerId GetControllerAssignment(int player);               // Get the contr
 int GetNumberOfPlayers(void);                                   // Get the number of players.
 
 // Playing screen.
-void InitPlayingScreen(int players, const ControllerId* controllers); // Initialise the playing screen.
+void InitPlayingScreen(void);                                   // Initialise the playing screen.
 void FinishPlayingScreen(void);                                 // Tear down the playing screen.
 void UpdatePlayingScreen(void);                                 // Update the playing screen.
 void DrawPlayingScreen(double alpha);                           // Draw the playing screen.
