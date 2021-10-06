@@ -41,11 +41,6 @@ typedef struct
 
 Item g_items[NUM_ITEMS];
 
-bool PointInAABB(Vector2 p, AABB aabb)
-{
-    return p.x >= aabb.c.x - aabb.e.x && p.x <= aabb.c.x + aabb.e.x && p.y >= aabb.c.y - aabb.e.y && p.y <= aabb.c.y + aabb.e.y;
-}
-
 inline float Sign(float n)
 {
     if (n < 0.0f)
@@ -59,31 +54,51 @@ inline float Sign(float n)
     return 0.0f;
 }
 
+static inline float Max(float a, float b)
+{
+    return a > b ? a : b;
+}
+
+static inline float Min(float a, float b)
+{
+    return a < b ? a : b;
+}
+
 // See: https://noonat.github.io/intersect/#intersection-tests
+// NOTE: there are better ways of doing this.
 bool SegmentInAABB(Segment s, AABB aabb)
 {
     const Vector2 delta = Vector2Subtract(s.end, s.start);
-    const float scaleX = delta.x == 0.0f ? 0.0f : (1.0f / delta.x);
-    const float scaleY = delta.y == 0.0f ? 0.0f : (1.0f / delta.y);
+    const float scaleX = 1.0f / delta.x;
+    const float scaleY = 1.0f / delta.y;
     const float signX = Sign(scaleX);
     const float signY = Sign(scaleY);
+
     const float nearTimeX = (aabb.c.x - signX * aabb.e.x - s.start.x) * scaleX;
+    const float farTimeY = (aabb.c.y + signY * aabb.e.y - s.start.y) * scaleY;
+    if (nearTimeX > farTimeY)
+    {
+        return false;
+    }
+
     const float nearTimeY = (aabb.c.y - signY * aabb.e.y - s.start.y) * scaleY;
     const float farTimeX = (aabb.c.x + signX * aabb.e.x - s.start.x) * scaleX;
-    const float farTimeY = (aabb.c.y + signY * aabb.e.y - s.start.y) * scaleY;
-    if (nearTimeX > farTimeY || nearTimeY > farTimeX)
+    if (nearTimeY > farTimeX)
     {
         return false;
     }
 
     // If we don't do this, then all we achieve is determining if the two things will ever collide, which is also useful, but not
     // what we want.
-    const float nearTime = nearTimeX > nearTimeY ? nearTimeX : nearTimeY;
-    const float farTime = farTimeX < farTimeY ? farTimeX : farTimeY;
+    const float nearTime = Max(nearTimeX, nearTimeY);
+    const float farTime = Min(farTimeX, farTimeY);
     if (nearTime >= 1.0f || farTime <= 0.0f)
     {
         return false;
     }
+
+    // At this point, if the near time is greater than zero then the segment starts outside the AABB and is entering it. The near
+    // time is the time of collision. Otherwise, we must be colliding at the start of th eline.
 
     return true;
 }
@@ -120,6 +135,16 @@ void FixedUpdate(void)
                 a->hit = true;
                 b->hit = true;
             }
+
+            //            float first;
+            //            float last;
+            //            AABB aabbA = {.c = a->position, .e = a->aabb.e};
+            //            AABB aabbB = {.c = b->position, .e = b->aabb.e};
+            //            if (IntersectMovingAABBAABB(aabbA, aabbB, a->velocity, b->velocity, &first, &last))
+            //            {
+            //                a->hit = true;
+            //                b->hit = true;
+            //            }
         }
         a->position = targetPos;
     }
