@@ -15,19 +15,20 @@
 #define SCREEN_WIDTH 2048
 #define SCREEN_HEIGHT 1024
 
-#define NUM_ITEMS 128
+#define NUM_ITEMS 1024
+#define MAX_ITEMS (NUM_ITEMS * 4)
 
 typedef struct
 {
-    Vector2 c; // Centre.
-    Vector2 e; // Extents (half-widths).
+    Vector2 centre;  // Centre.
+    Vector2 extents; // Extents (half-widths).
 } AABB;
 
 typedef struct
 {
-    Vector2 start;
-    Vector2 end;
-} Segment;
+    Vector2 origin;
+    Vector2 direction; // The direction is not necessarily normalized.
+} Ray2D;
 
 typedef struct
 {
@@ -39,20 +40,8 @@ typedef struct
     bool hit;         // Is it in collision?
 } Item;
 
-Item g_items[NUM_ITEMS];
-
-inline float Sign(float n)
-{
-    if (n < 0.0f)
-    {
-        return -1.0f;
-    }
-    if (n > 0.0f)
-    {
-        return 1.0f;
-    }
-    return 0.0f;
-}
+static int g_numItems = 0;
+static Item g_items[MAX_ITEMS];
 
 static inline float Max(float a, float b)
 {
@@ -64,43 +53,68 @@ static inline float Min(float a, float b)
     return a < b ? a : b;
 }
 
-// See: https://noonat.github.io/intersect/#intersection-tests
-// NOTE: there are better ways of doing this.
-bool SegmentInAABB(Segment s, AABB aabb)
+inline Vector2 Vector2Rcp(Vector2 a)
 {
-    const Vector2 delta = Vector2Subtract(s.end, s.start);
-    const float scaleX = 1.0f / delta.x;
-    const float scaleY = 1.0f / delta.y;
-    const float signX = Sign(scaleX);
-    const float signY = Sign(scaleY);
+    return (Vector2){.x = 1.0f / a.x, .y = 1.0f / a.y};
+}
 
-    const float nearTimeX = (aabb.c.x - signX * aabb.e.x - s.start.x) * scaleX;
-    const float farTimeY = (aabb.c.y + signY * aabb.e.y - s.start.y) * scaleY;
-    if (nearTimeX > farTimeY)
-    {
-        return false;
-    }
+inline Vector2 Vector2Min(Vector2 a, Vector2 b)
+{
+    return (Vector2){Min(a.x, b.x), Min(a.y, b.y)};
+}
 
-    const float nearTimeY = (aabb.c.y - signY * aabb.e.y - s.start.y) * scaleY;
-    const float farTimeX = (aabb.c.x + signX * aabb.e.x - s.start.x) * scaleX;
-    if (nearTimeY > farTimeX)
-    {
-        return false;
-    }
+inline Vector2 Vector2Max(Vector2 a, Vector2 b)
+{
+    return (Vector2){Max(a.x, b.x), Max(a.y, b.y)};
+}
 
-    // If we don't do this, then all we achieve is determining if the two things will ever collide, which is also useful, but not
-    // what we want.
-    const float nearTime = Max(nearTimeX, nearTimeY);
-    const float farTime = Min(farTimeX, farTimeY);
-    if (nearTime >= 1.0f || farTime <= 0.0f)
-    {
-        return false;
-    }
+inline float Vector2MinComponent(Vector2 a)
+{
+    return Min(a.x, a.y);
+}
 
-    // At this point, if the near time is greater than zero then the segment starts outside the AABB and is entering it. The near
-    // time is the time of collision. Otherwise, we must be colliding at the start of th eline.
+inline float Vector2MaxComponent(Vector2 a)
+{
+    return Max(a.x, a.y);
+}
 
-    return true;
+// See: https://medium.com/@bromanz/another-view-on-the-classic-ray-aabb-intersection-algorithm-for-bvh-traversal-41125138b525
+// https://gist.githubusercontent.com/bromanz/ed0de6725f5e40a0afd8f50985c2f7ad/raw/be5e79e16181e4617d1a0e6e540dd25c259c76a4/efficient-slab-test-majercik-et-al
+inline bool Slabs(Vector2 p0, Vector2 p1, Vector2 rayOrigin, Vector2 invRayDir)
+{
+    const Vector2 t0 = Vector2Multiply(Vector2Subtract(p0, rayOrigin), invRayDir);
+    const Vector2 t1 = Vector2Multiply(Vector2Subtract(p1, rayOrigin), invRayDir);
+    const Vector2 tmin = Vector2Min(t0, t1);
+    const Vector2 tmax = Vector2Max(t0, t1);
+    return Max(0.0f, Vector2MaxComponent(tmin)) <= Min(1.0f, Vector2MinComponent(tmax));
+}
+
+bool CheckCollisionRay2dAABBs(Ray2D r, AABB aabb)
+{
+    const Vector2 invD = Vector2Rcp(r.direction);
+    const Vector2 aabbMin = Vector2Subtract(aabb.centre, aabb.extents);
+    const Vector2 aabbMax = Vector2Add(aabb.centre, aabb.extents);
+    return Slabs(aabbMin, aabbMax, r.origin, invD);
+}
+
+bool CheckCollisionMovingAABBs(AABB a, AABB b, Vector2 va, Vector2 vb)
+{
+    // An AABB at B's position with the combined size of A and B.
+    const AABB aabb = {.centre = b.centre, .extents = Vector2Add(a.extents, b.extents)};
+
+    // A ray at A's position with its direction set to B's velocity relative to A. It's a parametric representation of a
+    // line representing A's position at time t, where 0 <= t <= 1.
+    const Ray2D r = {.origin = a.centre, .direction = Vector2Subtract(vb, va)};
+
+    // Does the ray hit the AABB
+    return CheckCollisionRay2dAABBs(r, aabb);
+}
+
+inline bool ItemsCollide(Item* a, Item* b)
+{
+    return CheckCollisionMovingAABBs((AABB){.centre = Vector2Add(a->position, a->aabb.extents), .extents = a->aabb.extents},
+                                     (AABB){.centre = Vector2Add(b->position, b->aabb.extents), .extents = b->aabb.extents},
+                                     a->velocity, b->velocity);
 }
 
 /**
@@ -108,43 +122,18 @@ bool SegmentInAABB(Segment s, AABB aabb)
  */
 void FixedUpdate(void)
 {
-    for (int i = 0; i < NUM_ITEMS; i++)
+    for (int i = 0; i < g_numItems; i++)
     {
         Item* a = &g_items[i];
         const Vector2 targetPos = Vector2Add(a->position, a->velocity);
-        for (int j = 0; j < NUM_ITEMS; j++)
+        for (int j = i + 1; j < g_numItems; j++)
         {
-            if (j == i)
-            {
-                continue;
-            }
-
-            // Effectively we're sweeping A into B.
             Item* b = &g_items[j];
-
-            // Create an AABB at B's position, but with the combined size of A and B.
-            const AABB aabb = {.c = Vector2Add(b->position, b->aabb.c), .e = Vector2Add(b->aabb.e, a->aabb.e)};
-
-            // Create a line segment from A's position to its position plus the two items' relative velocities.
-            const Segment s = {.start = a->position,
-                               .end = Vector2Subtract(a->position, Vector2Subtract(b->velocity, a->velocity))};
-
-            // If the line segment intersects the AABB then A has hit B.
-            if (SegmentInAABB(s, aabb))
+            if (ItemsCollide(a, b))
             {
                 a->hit = true;
                 b->hit = true;
             }
-
-            //            float first;
-            //            float last;
-            //            AABB aabbA = {.c = a->position, .e = a->aabb.e};
-            //            AABB aabbB = {.c = b->position, .e = b->aabb.e};
-            //            if (IntersectMovingAABBAABB(aabbA, aabbB, a->velocity, b->velocity, &first, &last))
-            //            {
-            //                a->hit = true;
-            //                b->hit = true;
-            //            }
         }
         a->position = targetPos;
     }
@@ -159,7 +148,7 @@ void Draw(double alpha)
     (void)alpha;
     ClearBackground(BLACK);
     BeginDrawing();
-    for (int i = 0; i < NUM_ITEMS; i++)
+    for (int i = 0; i < g_numItems; i++)
     {
         Item* item = &g_items[i];
         DrawRectangle((int)(item->position.x - item->size.x), (int)(item->position.y - item->size.y), (int)(2 * item->size.x),
@@ -175,10 +164,28 @@ void Draw(double alpha)
     EndDrawing();
 
     // Now that we've drawn everything, clear its hit flag.
-    for (int i = 0; i < NUM_ITEMS; i++)
+    for (int i = 0; i < g_numItems; i++)
     {
         g_items[i].hit = false;
     }
+}
+
+/**
+ * Creates a shot. Shots are very fast moving objects.
+ * @param start
+ * @param target
+ */
+void AddShot(Vector2 start, Vector2 target)
+{
+    if (g_numItems >= MAX_ITEMS)
+    {
+        return;
+    }
+    const Vector2 extents = {.x = 2.0f, .y = 2.0f};
+    const Vector2 velocity = Vector2Subtract(Vector2MoveTowards(start, target, 64.0f), start);
+    const Item item = {.position = start, .size = extents, .velocity = velocity, .color = RED, .aabb = {.extents = extents}};
+    g_items[g_numItems] = item;
+    g_numItems++;
 }
 
 /**
@@ -186,40 +193,35 @@ void Draw(double alpha)
  */
 void CheckTriggers(void)
 {
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+    {
+        const Vector2 target = GetMousePosition();
+        AddShot((Vector2){0.0f, 0.0f}, target);
+        AddShot((Vector2){SCREEN_WIDTH - 1.0f, 0.0f}, target);
+        AddShot((Vector2){SCREEN_WIDTH - 1.0f, SCREEN_HEIGHT - 1.0f}, target);
+        AddShot((Vector2){0.0f, SCREEN_HEIGHT - 1.0f}, target);
+    }
 }
 
 void InitItems(void)
 {
+    g_numItems = 0;
     const Vector2 centre = {.x = SCREEN_WIDTH / 2.0f, .y = SCREEN_HEIGHT / 2.0f};
     for (int i = 0; i < NUM_ITEMS; i++)
     {
-        if ((i % 8) != 0)
-        {
-            const Vector2 position = {.x = (float)GetRandomValue(0, SCREEN_WIDTH), .y = (float)GetRandomValue(0, SCREEN_HEIGHT)};
-            const Vector2 extents = {.x = (float)GetRandomValue(4, 40), .y = (float)GetRandomValue(4, 40)};
-            const float speed = 0.1f * (float)(1 + i);
-            const Vector2 velocity = Vector2Scale(Vector2Subtract(Vector2MoveTowards(position, centre, 1.0f), position), speed);
+        const Vector2 position = {.x = (float)GetRandomValue(0, SCREEN_WIDTH), .y = (float)GetRandomValue(0, SCREEN_HEIGHT)};
+        const Vector2 extents = {.x = (float)GetRandomValue(4, 40), .y = (float)GetRandomValue(4, 40)};
+        const float speed = 0.1f * (float)(1 + i);
+        const Vector2 velocity = Vector2Scale(Vector2Subtract(Vector2MoveTowards(position, centre, 1.0f), position), speed);
 
-            const Item item = {.position = position,
-                               .size = extents,
-                               .velocity = velocity,
-                               .color = DARKGREEN,
-                               .aabb = {.e = extents}};
+        const Item item = {.position = position,
+                           .size = extents,
+                           .velocity = velocity,
+                           .color = DARKGREEN,
+                           .aabb = {.extents = extents}};
 
-            g_items[i] = item;
-        }
-        else
-        {
-            const Vector2 position = {.x = 0.0f, .y = (float)GetRandomValue(0, SCREEN_HEIGHT)};
-            const Vector2 extents = {.x = 2.0f, .y = 2.0f};
-            const Vector2 velocity = {.x = 16.0f, .y = 0.0f};
-            const Item item = {.position = position,
-                               .size = extents,
-                               .velocity = velocity,
-                               .color = DARKGREEN,
-                               .aabb = {.e = extents}};
-            g_items[i] = item;
-        }
+        g_items[i] = item;
+        ++g_numItems;
     }
 }
 
