@@ -15,7 +15,7 @@
 #define SCREEN_WIDTH 2048
 #define SCREEN_HEIGHT 1024
 
-#define NUM_ITEMS 1024
+#define NUM_ITEMS 128
 #define MAX_ITEMS (NUM_ITEMS * 4)
 
 typedef struct
@@ -104,7 +104,7 @@ bool CheckCollisionMovingAABBs(AABB a, AABB b, Vector2 va, Vector2 vb)
 
     // A ray at A's position with its direction set to B's velocity relative to A. It's a parametric representation of a
     // line representing A's position at time t, where 0 <= t <= 1.
-    const Ray2D r = {.origin = a.centre, .direction = Vector2Subtract(vb, va)};
+    const Ray2D r = {.origin = a.centre, .direction = Vector2Subtract(va, vb)};
 
     // Does the ray hit the AABB
     return CheckCollisionRay2dAABBs(r, aabb);
