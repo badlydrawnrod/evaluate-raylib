@@ -101,22 +101,21 @@ You should see a retro-looking 3d racetrack.
 
 ## Prerequisites
 
-### **CMake** and **Ninja**
+### **CMake**
 
-You'll need [**CMake**](https://cmake.org/) and (optionally) [**Ninja**](https://ninja-build.org/). You can install
-these with a package manager, such as [**scoop**](https://scoop.sh/) or [**chocolatey**](https://chocolatey.org/).
+You'll need [**CMake**](https://cmake.org/). You can install it with a package manager, such as [**
+scoop**](https://scoop.sh/) or [**chocolatey**](https://chocolatey.org/).
 
-#### Installing **CMake** and **Ninja** using **scoop**
+#### Installing **CMake** using **scoop**
 
 ```
 C:> scoop install cmake
-C:> scoop install ninja
 ```
-#### Installing **CMake** and **Ninja** using **chocolatey**
+
+#### Installing **CMake** using **chocolatey**
 
 ```
 C:> choco install -y cmake --installargs 'ADD_CMAKE_TO_PATH=User'
-C:> choco install ninja
 ```
 ### **Git**
 
@@ -147,8 +146,8 @@ activate it and add the mingw tools (to get mingw-make).
 C:> emsdk activate latest
 C:> emsdk install mingw-7.1.0-64bit
 C:> emsdk activate mingw-7.1.0-64bit
-```
 
+```
 ## Building
 
 Open a command prompt.
