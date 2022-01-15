@@ -103,8 +103,8 @@ You should see a retro-looking 3d racetrack.
 
 ### **CMake**
 
-You'll need [**CMake**](https://cmake.org/). You can install it with a package manager, such as [**
-scoop**](https://scoop.sh/) or [**chocolatey**](https://chocolatey.org/).
+You'll need [**CMake**](https://cmake.org/). You can install it with a package manager, such as
+[**scoop**](https://scoop.sh/) or [**chocolatey**](https://chocolatey.org/).
 
 #### Installing **CMake** using **scoop**
 
