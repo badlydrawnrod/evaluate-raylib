@@ -39,6 +39,8 @@ if (NO_MSAA)
     add_compile_definitions(NO_MSAA)
 endif ()
 
+add_subdirectory(draw_text_rec)
+
 add_subdirectory(simple)
 add_subdirectory(spaceships)
 add_subdirectory(tanks)

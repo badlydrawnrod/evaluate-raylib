@@ -1,7 +1,6 @@
+#include "draw_text_rec/draw_text_rec.h"
 #include "raylib.h"
 #include "tanks.h"
-
-#include "draw_text_rec.h"
 
 #define MAX_KEYBOARDS 2
 #define MAX_GAMEPADS 4

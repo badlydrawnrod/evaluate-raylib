@@ -1,4 +1,4 @@
-project(tanks)
+project(draw_text_rec)
 
 if (MSVC)
     # Warning level 4 and all warnings as errors.
@@ -18,12 +18,6 @@ if (EMSCRIPTEN)
     endif ()
 endif ()
 
-add_executable(tanks tanks.c controls.c menu.c playing.c tanks.h)
-target_include_directories(tanks PRIVATE ${CMAKE_SOURCE_DIR} draw_text_rec)
-target_link_libraries(tanks raylib draw_text_rec)
-
-set(tanks_assets)
-file(GLOB assets ${CMAKE_SOURCE_DIR}/assets/*)
-list(APPEND tanks_assets ${assets})
-
-file(COPY ${tanks_assets} DESTINATION "assets/")
+add_library(draw_text_rec draw_text_rec.c draw_text_rec.h)
+target_include_directories(draw_text_rec PRIVATE ${CMAKE_SOURCE_DIR})
+target_link_libraries(draw_text_rec raylib)
