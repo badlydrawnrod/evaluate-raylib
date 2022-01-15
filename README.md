@@ -101,22 +101,21 @@ You should see a retro-looking 3d racetrack.
 
 ## Prerequisites
 
-### **CMake** and **Ninja**
+### **CMake**
 
-You'll need [**CMake**](https://cmake.org/) and (optionally) [**Ninja**](https://ninja-build.org/). You can install
-these with a package manager, such as [**scoop**](https://scoop.sh/) or [**chocolatey**](https://chocolatey.org/).
+You'll need [**CMake**](https://cmake.org/). You can install it with a package manager, such as
+[**scoop**](https://scoop.sh/) or [**chocolatey**](https://chocolatey.org/).
 
-#### Installing **CMake** and **Ninja** using **scoop**
+#### Installing **CMake** using **scoop**
 
 ```
 C:> scoop install cmake
-C:> scoop install ninja
 ```
-#### Installing **CMake** and **Ninja** using **chocolatey**
+
+#### Installing **CMake** using **chocolatey**
 
 ```
 C:> choco install -y cmake --installargs 'ADD_CMAKE_TO_PATH=User'
-C:> choco install ninja
 ```
 ### **Git**
 
@@ -127,16 +126,28 @@ You'll need [**git**](https://git-scm.com/) to clone the repo. You can install t
 ```
 C:> scoop install git
 ```
+
 #### Installing **git** using **chocolatey**
 
 ```
 C:> choco install git
 ```
+
 ### **Emscripten**
 
-To compile for the web, you'll need to install [**Emscripten**](https://emscripten.org/), which is a compiler toolchain that lets you compile to [**WebAssembly**](https://developer.mozilla.org/en-US/docs/WebAssembly).
+To compile for the web, you'll need to install [**Emscripten**](https://emscripten.org/), which is a compiler toolchain
+that lets you compile to [**WebAssembly**](https://developer.mozilla.org/en-US/docs/WebAssembly).
 
-Install **Emscripten** using [these instructions](https://emscripten.org/docs/getting_started/downloads.html#installation-instructions).
+Install **Emscripten**
+using [these instructions](https://emscripten.org/docs/getting_started/downloads.html#installation-instructions), then
+activate it and add the mingw tools (to get mingw-make).
+
+```text
+C:> emsdk activate latest
+C:> emsdk install mingw-7.1.0-64bit
+C:> emsdk activate mingw-7.1.0-64bit
+
+```
 ## Building
 
 Open a command prompt.
@@ -160,21 +171,23 @@ Generate a build system with **CMake**. This will detect the **Emscripten** tool
 Change `EMSCRIPTEN_ROOT_PATH` and `CMAKE_TOOLCHAIN_FILE` to match where **Emscripten** is installed on your system. In the example below, it is installed in `D:\Tools\emsdk`.
 
 ```
-C:> cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -S ..
+C:> cmake -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Debug -S ..
     -DNO_MSAA=ON
     -DPLATFORM=Web
     -DEMSCRIPTEN_ROOT_PATH=D:\Tools\emsdk\upstream\emscripten
     -DCMAKE_TOOLCHAIN_FILE=D:\Tools\emsdk\upstream\emscripten\cmake\Modules\Platform\Emscripten.cmake 
 ```
 
-From the same directory, tell **CMake** to call the build system (**Ninja**) to compile and link the project. This will build everything, includng **raylib**. It will finish in seconds, as **Ninja** is lightning quick.
+From the same directory, tell **CMake** to call the build system to compile and link the project. This will build
+everything, includng **raylib**. It will finish in seconds, as **Ninja** is lightning quick.
 
 ```
 C:> cmake --build .
 ```
 ## Running
 
-Run a web server from the build directory. You can use a recent version of [**python**](https://www.python.org/) for this.
+Run a web server from the build directory. You can use a recent version of [**python**](https://www.python.org/) for
+this.
 ```
 C:> python -m http.server 8080
 ```
