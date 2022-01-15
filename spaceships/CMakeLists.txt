@@ -19,12 +19,12 @@ if (EMSCRIPTEN)
 endif ()
 
 add_executable(spaceships spaceships.c controls.c menu.c playing.c spaceships.h)
-target_include_directories(spaceships PRIVATE ${CMAKE_SOURCE_DIR})
-target_link_libraries(spaceships raylib)
+target_include_directories(spaceships PRIVATE ${CMAKE_SOURCE_DIR} draw_text_rec)
+target_link_libraries(spaceships raylib draw_text_rec)
 
 add_executable(advanced_spaceships advanced_spaceships.c controls.c menu.c playing.c spaceships.h)
-target_include_directories(advanced_spaceships PRIVATE ${CMAKE_SOURCE_DIR})
-target_link_libraries(advanced_spaceships raylib)
+target_include_directories(advanced_spaceships PRIVATE ${CMAKE_SOURCE_DIR} draw_text_rec)
+target_link_libraries(advanced_spaceships raylib draw_text_rec)
 
 set(spaceships_assets)
 file(GLOB assets ${CMAKE_SOURCE_DIR}/assets/*)
