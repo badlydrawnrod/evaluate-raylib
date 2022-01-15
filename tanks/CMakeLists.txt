@@ -18,7 +18,7 @@ if (EMSCRIPTEN)
     endif ()
 endif ()
 
-add_executable(tanks tanks.c controls.c menu.c playing.c tanks.h)
+add_executable(tanks tanks.c controls.c menu.c playing.c tanks.h draw_text_rec.c draw_text_rec.h)
 target_include_directories(tanks PRIVATE ${CMAKE_SOURCE_DIR})
 target_link_libraries(tanks raylib)
 

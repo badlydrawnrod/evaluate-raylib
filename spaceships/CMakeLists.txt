@@ -18,11 +18,11 @@ if (EMSCRIPTEN)
     endif ()
 endif ()
 
-add_executable(spaceships spaceships.c controls.c menu.c playing.c spaceships.h)
+add_executable(spaceships spaceships.c controls.c menu.c playing.c spaceships.h draw_text_rec.c draw_text_rec.h)
 target_include_directories(spaceships PRIVATE ${CMAKE_SOURCE_DIR})
 target_link_libraries(spaceships raylib)
 
-add_executable(advanced_spaceships advanced_spaceships.c controls.c menu.c playing.c spaceships.h)
+add_executable(advanced_spaceships advanced_spaceships.c controls.c menu.c playing.c spaceships.h draw_text_rec.c draw_text_rec.h)
 target_include_directories(advanced_spaceships PRIVATE ${CMAKE_SOURCE_DIR})
 target_link_libraries(advanced_spaceships raylib)
 

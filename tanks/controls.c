@@ -1,6 +1,8 @@
 #include "raylib.h"
 #include "tanks.h"
 
+#include "draw_text_rec.h"
+
 #define MAX_KEYBOARDS 2
 #define MAX_GAMEPADS 4
 #define MAX_CONTROLLERS (MAX_KEYBOARDS + MAX_GAMEPADS)
